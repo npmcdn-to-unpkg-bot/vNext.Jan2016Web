@@ -52,9 +52,13 @@ gulp.task('copy:p6.sports:areas', function () {
     return gulp.src(['../p6.sports/Areas/**', '!../p6.sports/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
-
+gulp.task('copy:p6.animals:areas', function () {
+    return gulp.src(['../p6.animals/Areas/**', '!../p6.animals/Areas/*/{Controllers,Controllers/**}'])
+        .pipe(gulp.dest('Areas/'));
+});
 gulp.task('watch', function () {
-    return gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
+    gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
+    gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
 });
 
 

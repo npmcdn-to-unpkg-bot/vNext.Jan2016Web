@@ -14,6 +14,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Jan2016Web", "src\Jan2016We
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "p6.sports", "src\p6.sports\p6.sports.xproj", "{680C6674-C44F-4C7A-8C3B-C64A6428689B}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "p6.animals", "src\p6.animals\p6.animals.xproj", "{F7F14A8F-7DA2-47D4-8FB4-B81B20C51E8E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{680C6674-C44F-4C7A-8C3B-C64A6428689B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{680C6674-C44F-4C7A-8C3B-C64A6428689B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{680C6674-C44F-4C7A-8C3B-C64A6428689B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7F14A8F-7DA2-47D4-8FB4-B81B20C51E8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7F14A8F-7DA2-47D4-8FB4-B81B20C51E8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7F14A8F-7DA2-47D4-8FB4-B81B20C51E8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7F14A8F-7DA2-47D4-8FB4-B81B20C51E8E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -35,5 +41,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B7F430D7-5AFD-4EDB-9F42-28901AB99C95} = {1E880CEB-4394-4573-B546-EC0BD84F55D6}
 		{680C6674-C44F-4C7A-8C3B-C64A6428689B} = {1E880CEB-4394-4573-B546-EC0BD84F55D6}
+		{F7F14A8F-7DA2-47D4-8FB4-B81B20C51E8E} = {1E880CEB-4394-4573-B546-EC0BD84F55D6}
 	EndGlobalSection
 EndGlobal

@@ -1,4 +1,4 @@
-﻿{
+{
   "userSecretsId": "aspnet5-Jan2016Web-d3230180-694b-48c1-b7e9-68f72ae21071",
   "version": "1.0.0-*",
   "compilationOptions": {
@@ -25,6 +25,7 @@
         "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
         "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
+        "p6.animals": "1.0.0-*",
         "p6.sports": "1.0.0-*"
     },
 
