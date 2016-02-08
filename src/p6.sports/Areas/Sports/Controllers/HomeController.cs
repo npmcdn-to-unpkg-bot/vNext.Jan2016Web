@@ -13,5 +13,10 @@ namespace p6.sports.Areas.Sports.Controllers
             var s = "";
             return View();
         }
+        public IActionResult Open()
+        {
+            var s = "";
+            return View();
+        }
     }
 }
