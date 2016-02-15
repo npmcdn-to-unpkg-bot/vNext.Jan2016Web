@@ -19,7 +19,7 @@ namespace Jan2016Web.Filters
         public override void OnActionExecuting(ActionExecutingContext actionContext)
         {
             Console.WriteLine(actionContext.HttpContext.Request);
-//            this.logger.Log(actionContext.HttpContext.Request);
+            //            this.logger.Log(actionContext.HttpContext.Request);
         }
     }
 }

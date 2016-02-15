@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Jan2016Web.Filters;
+using Jan2016Web.IoC;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -18,117 +21,15 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.OptionsModel;
 using Microsoft.Extensions.PlatformAbstractions;
-
+using Microsoft.Extensions.Primitives;
+using Pingo.Core.Settings;
 
 namespace Jan2016Web
 {
-    public class RouteValues
-    {
-        public string Area { get; set; }
-        public string Controller { get; set; }
-        public string Action { get; set; }
 
-    }
-    public class OptInOutRecord
-    {
-        public List<String> Areas { get; set; }
-
-        private Dictionary<String, bool> _areasMap;
-        public Dictionary<String, bool> AreasMap
-        {
-            get
-            {
-                if (_areasMap == null)
-                {
-                    _areasMap = new Dictionary<string, bool>();
-                    if (Areas != null)
-                    {
-                        foreach (var item in Areas)
-                        {
-                            _areasMap.Add(item, true);
-                        }
-                        Areas = null;// to reduce memory
-                    }
-                }
-                return _areasMap;
-            } 
-        }
-
-        public List<String> Controllers { get; set; }
-        private Dictionary<String, bool> _controllersMap;
-        public Dictionary<String, bool> ControllersMap
-        {
-            get
-            {
-                if (_controllersMap == null)
-                {
-                    _controllersMap = new Dictionary<string, bool>();
-                    if (Controllers != null)
-                    {
-                        foreach (var item in Controllers)
-                        {
-                            _controllersMap.Add(item, true);
-                        }
-                        Controllers = null;
-                    }
-                }
-                return _controllersMap;
-            }
-        }
-
-        public List<String> Actions { get; set; }
-        private Dictionary<String, bool> _actionsMap;
-        public Dictionary<String, bool> ActionsMap
-        {
-            get
-            {
-                if (_actionsMap == null)
-                {
-                    _actionsMap = new Dictionary<string, bool>();
-                    if (Actions != null)
-                    {
-                        foreach (var item in Actions)
-                        {
-                            _actionsMap.Add(item, true);
-                        }
-                        Actions = null;
-                    }
-                }
-                return _actionsMap;
-            }
-        }
-    }
-
-    public class AuthorizationConfig
-    {
-        public string Filter { get; set; }
-        public RouteValues RouteValues { get; set; }
-        public OptInOutRecord OptOut { get; set; }
-    }
-
-    public class SimpleManyRecord
-    {
-        public string Filter { get; set; }
-        public OptInOutRecord Value { get; set; }
-    }
-
-
-    public class SimpleManyConfig
-    {
-        public List<SimpleManyRecord> OptOut { get; set; }
-        public List<SimpleManyRecord> OptIn { get; set; }
-    }
-
-
-    public class FiltersConfig
-    {
-        public AuthorizationConfig Authorization { get; set; }
-        public SimpleManyConfig SimpleMany { get; set; }
-    }
-
-   
    
     public class Site 
     {
@@ -235,7 +136,36 @@ namespace Jan2016Web
 */
         }
     }
-    
+
+    public class GlobalSettings: IConfigurationRoot
+    {
+        public static IConfigurationRoot Configuration { get; set; }
+        public IConfigurationSection GetSection(string key)
+        {
+            return Configuration.GetSection(key);
+        }
+
+        public IEnumerable<IConfigurationSection> GetChildren()
+        {
+            return Configuration.GetChildren();
+        }
+
+        public IChangeToken GetReloadToken()
+        {
+            return Configuration.GetReloadToken();
+        }
+
+        public string this[string key]
+        {
+            get { return Configuration[key]; }
+            set { Configuration[key] = value; }
+        }
+
+        public void Reload()
+        {
+            Configuration.Reload();
+        }
+    }
     public class Startup
     {
         public Startup(IHostingEnvironment env)
@@ -254,13 +184,14 @@ namespace Jan2016Web
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
 
-            var dd = Configuration["Logging:SomeArray"]; 
+            var dd = Configuration["Logging:SomeArray"];
+            GlobalSettings.Configuration = Configuration;
         }
 
         public IConfigurationRoot Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
             services.AddEntityFramework()
@@ -275,6 +206,14 @@ namespace Jan2016Web
             services.AddSingleton<LogFilter>();
 
             services.AddMvc();
+            services.AddCaching();
+
+            // Create the Autofac container builder.
+            //         var containerBuilder = new ContainerBuilder();
+            // Add any Autofac modules or registrations.
+            //         containerBuilder.RegisterModule(new AutofacModule());
+
+//            return container.Resolve<IServiceProvider>();
 
             services.AddOptions();
             services.Configure<FiltersConfig>(Configuration.GetSection("Filters"));
@@ -282,7 +221,50 @@ namespace Jan2016Web
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+            // services.AddSingleton<IFilterProvider, MyFluentFilterProvider>();
             services.AddSingleton<IFilterProvider, OverrideFriendlyFilterProvider>();
+            services.AddSingleton<IConfigurationRoot>();
+
+            services.AddSingleton<IConfigurationRoot, GlobalSettings>();
+
+            // var sp = services.BuildServiceProvider();
+
+            //    containerBuilder.Populate(services);
+
+            // autofac auto registration
+            services.AddDependencies();
+            var serviceProvider = services.BuildServiceProvider(Configuration);
+
+            ILibraryManager libraryManager = null;
+            libraryManager = services.GetService<ILibraryManager>();
+            TypeGlobals.LibraryManager = libraryManager;
+            var dependencyResolver = services.GetService<IDependencyResolver>();
+
+            OverrideFriendlyFilterProvider.Configure(Configuration);
+
+            var typeFinder = new TypeFinder(libraryManager);
+
+            var registrationTypes =
+                TypeHelper<Controller>.FindTypesInAssemblies(TypeHelper<Controller>.IsType).ToList();
+            List<Type> types = new List<Type>();
+            foreach (Type type in registrationTypes)
+            {
+                var attrib = type.GetCustomAttributes(typeof (AreaAttribute), true);
+                if (attrib.Length > 0)
+                {
+                    RouteConstraintAttribute f = (RouteConstraintAttribute) attrib.First();
+
+                    types.Add(type);
+                }
+            }
+
+            //   var container = containerBuilder.Build();
+            //   var sp = container.Resolve<IServiceProvider>();
+            var authFilter = serviceProvider.GetService(typeof (Pingo.Filters.AuthActionFilter));
+            var config = serviceProvider.GetService(typeof (IConfigurationRoot));
+            var global = serviceProvider.GetService<Pingo.Core.Global>();
+            Pingo.Core.TheApp.Global = global;
+            return serviceProvider;
 
         }
 
@@ -290,22 +272,10 @@ namespace Jan2016Web
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             ILibraryManager libraryManager = app.GetService<ILibraryManager>();
-            var dd = new DefaultAssemblyProvider(libraryManager);
-            var cand = dd.CandidateAssemblies;
-            foreach (var a in cand)
-            {
-                try
-                {
-                    System.Diagnostics.Debug.WriteLine("Assembly:>>" + a.FullName);
-                }
-                catch
-                {
-                }
-            }
+            TypeGlobals.LibraryManager = libraryManager;
 
             var typeFinder = new TypeFinder(libraryManager);
 
-            TypeHelper<Controller>.LibraryManager = app.GetService<ILibraryManager>();
             var registrationTypes =
                TypeHelper<Controller>.FindTypesInAssemblies(TypeHelper<Controller>.IsType).ToList();
             List<Type> types = new List<Type>();

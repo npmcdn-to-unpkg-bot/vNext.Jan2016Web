@@ -7,8 +7,11 @@
 
     "dependencies": {
         "Autofac": "4.0.0-rc1-177",
+        "Autofac.Configuration": "4.0.0-rc1-268",
+        "Autofac.Extensions.DependencyInjection": "4.0.0-rc1-177",
         "EntityFramework.Commands": "7.0.0-rc1-final",
         "EntityFramework.MicrosoftSqlServer": "7.0.0-rc1-final",
+        "log4net": "2.0.5",
         "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
         "Microsoft.AspNet.Diagnostics.Entity": "7.0.0-rc1-final",
         "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-rc1-final",
@@ -29,7 +32,9 @@
         "Microsoft.Owin": "3.0.1",
         "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
         "p6.animals": "1.0.0-*",
-        "p6.sports": "1.0.0-*"
+        "p6.sports": "1.0.0-*",
+        "Pingo.Core": "1.0.0-*",
+        "Pingo.Filters": "1.0.0-*"
     },
 
   "commands": {
