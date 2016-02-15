@@ -4,6 +4,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Controllers;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.OptionsModel;
 using Pingo.Core.Reflection;
 using Pingo.Core.Settings;
@@ -12,15 +13,17 @@ namespace Pingo.Core.Providers
 {
     public class OptOutOptInFilterProvider : IFilterProvider
     {
-        IOptions<FiltersConfig> _settings;
-        IServiceProvider _serviceProvider;
+        private readonly ILogger<OptOutOptInFilterProvider> _logger;
+
+        private IOptions<FiltersConfig> _settings;
+        private IServiceProvider _serviceProvider;
         private static readonly object locker = new object();
         private static Dictionary<string, List<FilterItem>> ActionFilterMap = new Dictionary<string, List<FilterItem>>();
         private static Dictionary<string, FilterItem> TypeToFilterItem = new Dictionary<string, FilterItem>();
-        private static bool _frontLoaded;
 
-        public OptOutOptInFilterProvider(IServiceProvider serviceProvider, IOptions<FiltersConfig> settings)
+        public OptOutOptInFilterProvider(IServiceProvider serviceProvider, IOptions<FiltersConfig> settings,ILogger<OptOutOptInFilterProvider> logger)
         {
+             _logger = logger;
             _settings = settings;
             _serviceProvider = serviceProvider;
             FrontLoadFilterItems();
@@ -28,14 +31,28 @@ namespace Pingo.Core.Providers
 
         private void FrontLoadFilterItems()
         {
-            if (_settings.Value.SimpleMany != null)
+            _logger.LogInformation("Enter");
+            try
             {
+                if (_settings.Value.SimpleMany == null)
+                {
+                    throw new Exception("_settings.Value.SimpleMany cannot be NULL.  Check your appsettings.json.");
+                }
                 FilterItem filterItem;
                 if (_settings.Value.SimpleMany.OptOut != null)
                 {
                     foreach (var record in _settings.Value.SimpleMany.OptOut)
                     {
-                        filterItem = CreateFilterItem(record.Filter);
+                        _logger.LogInformation("Processing OptOut Record: {0}", record);
+                        try
+                        {
+                            filterItem = CreateFilterItem(record.Filter);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception(
+                                $"fiter:{record.Filter}, seems to be bad, are you sure it is referenced.", e);
+                        }
                         TypeToFilterItem.Add(record.Filter, filterItem);
                     }
                 }
@@ -44,11 +61,27 @@ namespace Pingo.Core.Providers
                 {
                     foreach (var record in _settings.Value.SimpleMany.OptIn)
                     {
-                        filterItem = CreateFilterItem(record.Filter);
+                        _logger.LogInformation("Processing OptIn Record: {0}",record);
+                        try
+                        {
+                            filterItem = CreateFilterItem(record.Filter);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception(
+                                $"fiter:{record.Filter}, seems to be bad, are you sure it is referenced.",e);
+                        }
                         TypeToFilterItem.Add(record.Filter, filterItem);
                     }
                 }
+
             }
+            catch (Exception e)
+            {
+                _logger.LogCritical(e.Message);
+                throw;
+            }
+            _logger.LogInformation("Exit");
         }
 
         private FilterItem CreateFilterItem(string filterType)

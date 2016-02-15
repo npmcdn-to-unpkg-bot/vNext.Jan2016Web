@@ -19,9 +19,14 @@ namespace Pingo.Core.IoC
             var result = (
                 from ServiceDescriptor serviceDescriptor in services
                 where serviceDescriptor.ServiceType == typeof (T)
-                select serviceDescriptor).First();
+                select serviceDescriptor);
 
-            return (T)result.ImplementationInstance;
+            if (result.Any())
+            {
+                var first = result.First();
+                return (T) first.ImplementationInstance;
+            }
+            return null;
         }
 
         public static IServiceCollection AddDependencies(this IServiceCollection services)
