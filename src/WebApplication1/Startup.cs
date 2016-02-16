@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Antiforgery;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Data.Entity;
@@ -11,10 +14,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 using Pingo.Core;
 using Pingo.Core.IoC;
 using Pingo.Core.Reflection;
 using Pingo.Core.Settings;
+using Serilog;
+using Serilog.Sinks.RollingFile;
 using WebApplication1.Models;
 using WebApplication1.Services;
 
@@ -22,11 +29,32 @@ namespace WebApplication1
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IHostingEnvironment env, IApplicationEnvironment appEnvironment)
         {
+            var RollingPath = Path.Combine(appEnvironment.ApplicationBasePath, "logs/myapp-{Date}.txt");
+            Log.Logger = new LoggerConfiguration()
+                 .WriteTo.RollingFile(RollingPath)
+                .CreateLogger();
+            Log.Information("Ah, there you are!");
+
+            var schemaJsonPath = Path.Combine(appEnvironment.ApplicationBasePath,"appsettings-filters-schema.json");
+            var schemaJson = File.ReadAllText(schemaJsonPath);
+            JSchema schema = JSchema.Parse(schemaJson);
+
+            var schemaJsonFiltersPath = Path.Combine(appEnvironment.ApplicationBasePath, "appsettings-filters.json");
+            var schemaJsonFilters = File.ReadAllText(schemaJsonFiltersPath);
+            JObject user = JObject.Parse(schemaJsonFilters);
+
+            bool valid = user.IsValid(schema);
+            if (!valid)
+            {
+                throw new Exception("Schema Validation Failed for appsettings-filters-schema.json");
+            }
+
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings-filters.json")
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
             if (env.IsDevelopment())
@@ -47,6 +75,13 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+      
+            services.AddElm();
+            services.ConfigureElm(options =>
+            {
+//                options.Path = new PathString("/foo");  // defaults to "/Elm"
+                options.Filter = (name, level) => level >= LogLevel.Information;
+            });
             // Add framework services.
             services.AddEntityFramework()
                 .AddSqlServer()
@@ -90,8 +125,12 @@ namespace WebApplication1
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            app.UseElmPage(); // Shows the logs at the specified path
+            app.UseElmCapture(); // Adds the ElmLoggerProvider
+
+            loggerFactory.AddSerilog();
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 

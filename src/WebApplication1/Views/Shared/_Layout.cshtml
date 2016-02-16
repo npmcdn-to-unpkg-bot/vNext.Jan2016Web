@@ -1,4 +1,14 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.AspNet.Antiforgery.IAntiforgery Xsrf
+@functions
+{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).FormToken;
+    }
+
+}
+
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8" />
@@ -64,5 +74,11 @@
         </environment>
 
         @RenderSection("scripts", required: false)
+
+            <script type="text/javascript">
+        var dd =  @GetAntiXsrfRequestToken();
+            </script>
+
+
     </body>
 </html>
