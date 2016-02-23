@@ -18,6 +18,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Pingo.Core;
 using Pingo.Core.IoC;
+using Pingo.Core.Middleware;
 using Pingo.Core.Reflection;
 using Pingo.Core.Settings;
 using Serilog;
@@ -75,7 +76,12 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-      
+            services.AddAuthentication();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
+            });
+
             services.AddElm();
             services.ConfigureElm(options =>
             {
@@ -127,6 +133,17 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            app.UseCookieAuthentication(options =>
+            {
+                options.AutomaticAuthenticate = true;
+            });
+            app.UseProtectFolder(new ProtectFolderOptions
+            {
+                Path = "/Elm",
+                PolicyName = "Authenticated"
+            });
+
+            app.UseAuthorizeMiddleware();
             app.UseElmPage(); // Shows the logs at the specified path
             app.UseElmCapture(); // Adds the ElmLoggerProvider
 
