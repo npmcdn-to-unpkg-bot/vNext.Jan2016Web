@@ -23,8 +23,6 @@ using Pingo.Core.Reflection;
 using Pingo.Core.Settings;
 using Serilog;
 using Serilog.Sinks.RollingFile;
-using WebApplication1.Models;
-using WebApplication1.Services;
 
 namespace WebApplication1
 {
@@ -91,12 +89,17 @@ namespace WebApplication1
             // Add framework services.
             services.AddEntityFramework()
                 .AddSqlServer()
-                .AddDbContext<ApplicationDbContext>(options =>
+                .AddDbContext<Pingo.Authorization.Models.ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+            //services.AddIdentity<ApplicationUser, IdentityRole>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>()
+            //    .AddDefaultTokenProviders();
+
+            services.AddIdentity<Pingo.Authorization.Models.ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<Pingo.Authorization.Models.ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
 
             services.AddMvc();
             services.AddCaching(); // Memory Caching stuff
@@ -108,8 +111,8 @@ namespace WebApplication1
             services.Configure<FiltersConfig>(Configuration.GetSection(FiltersConfig.WellKnown_FilterSectionName));
 
             // Add application services.
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
+            services.AddTransient<Pingo.Authorization.Services.IEmailSender, Pingo.Authorization.Services.AuthMessageSender>();
+            services.AddTransient<Pingo.Authorization.Services.ISmsSender, Pingo.Authorization.Services.AuthMessageSender>();
 
 
             // Do this before we do a BuildServiceProvider because some downstream autofac modules need the librarymanager.
@@ -167,7 +170,7 @@ namespace WebApplication1
                     using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
                         .CreateScope())
                     {
-                        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
+                        serviceScope.ServiceProvider.GetService<Pingo.Authorization.Models.ApplicationDbContext>()
                              .Database.Migrate();
                     }
                 }

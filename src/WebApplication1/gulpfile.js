@@ -56,9 +56,14 @@ gulp.task('copy:p6.animals:areas', function () {
     return gulp.src(['../p6.animals/Areas/**', '!../p6.animals/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
+gulp.task('copy:Pingo.Authorization:areas', function () {
+    return gulp.src(['../Pingo.Authorization/Areas/**', '!../Pingo.Authorization/Areas/*/{Controllers,Controllers/**}'])
+        .pipe(gulp.dest('Areas/'));
+});
 gulp.task('watch', function () {
     gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
     gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
+    gulp.watch(['../Pingo.Authorization/Areas/**'], ['copy:Pingo.Authorization:areas']);
 });
 
 gulp.task("min", ["min:js", "min:css"]);
