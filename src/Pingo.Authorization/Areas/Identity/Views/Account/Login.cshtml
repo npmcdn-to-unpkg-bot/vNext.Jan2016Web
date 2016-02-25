@@ -5,9 +5,9 @@
 @using Microsoft.AspNet.Identity
 @using Pingo.Authorization.Models
 @using Pingo.Authorization.ViewModels.Account
-@model Pingo.Authorization.ViewModels.Account.LoginViewModel
-@inject SignInManager<ApplicationUser> SignInManager
 
+@model LoginViewModel
+@inject SignInManager<ApplicationUser> SignInManager
 @{
     ViewData["Title"] = "Log in";
 }
