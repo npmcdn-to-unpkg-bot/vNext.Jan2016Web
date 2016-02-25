@@ -22,7 +22,7 @@ namespace Pingo.Filters
             var derivedTypesName = derivedTypes.Select(x => x.GetTypeInfo().Name);
             logger.Information("Found these types: {DerivedTypes}", derivedTypesName);
 
-            builder.RegisterTypes(derivedTypes);
+            builder.RegisterTypes(derivedTypes).SingleInstance();
             /*
 
             builder.RegisterType<AuthActionFilter>().SingleInstance();

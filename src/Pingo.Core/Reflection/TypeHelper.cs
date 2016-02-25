@@ -101,6 +101,33 @@ i.e. COA.MEF.Calculator.Globalization.Views.Home, COA.MEF.Calculator.Globalizati
             return typesSoFar.Where(type => type.IsPublicClass() && predicate(type));
         }
 
+
+        public static IEnumerable<Type> FindTypesInAssembly2(Assembly assembly)
+        {
+            Predicate<Type> predicate = TypeHelper<T>.IsType;
+            return FindTypesInAssembly2(assembly, predicate);
+        }
+
+        public static IEnumerable<Type> FindTypesInAssembly2(Assembly assembly,
+            Predicate<Type> predicate)
+        {
+            // Go through all assemblies referenced by the application and search for types matching a predicate
+            IEnumerable<Type> typesSoFar = Type.EmptyTypes;
+
+
+            Type[] typesInAsm;
+            try
+            {
+                typesInAsm = assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                typesInAsm = ex.Types;
+            }
+            typesSoFar = typesSoFar.Concat(typesInAsm);
+            return typesSoFar.Where(type => type.IsPublicClass() && predicate(type));
+        }
+
         public static IEnumerable<Type> FindTypesInAssemblies(IEnumerable<Assembly> assemblies,
             Predicate<Type> predicate)
         {
@@ -109,18 +136,9 @@ i.e. COA.MEF.Calculator.Globalization.Views.Home, COA.MEF.Calculator.Globalizati
 
             foreach (Assembly assembly in assemblies)
             {
-                Type[] typesInAsm;
-                try
-                {
-                    typesInAsm = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    typesInAsm = ex.Types;
-                }
-                typesSoFar = typesSoFar.Concat(typesInAsm);
+                typesSoFar = typesSoFar.Concat(FindTypesInAssembly2(assembly, predicate));
             }
-            return typesSoFar.Where(type => type.IsPublicClass() && predicate(type));
+            return typesSoFar;
         }
 
         public static IEnumerable<Type> FindTypesInAssemblies(Predicate<Type> predicate)
@@ -135,6 +153,18 @@ i.e. COA.MEF.Calculator.Globalization.Views.Home, COA.MEF.Calculator.Globalizati
             var registrationTypes = FindTypesInAssemblies(IsType).ToList();
             var types = new List<Type>();
             foreach (Type type in registrationTypes)
+            {
+                if (type.GetTypeInfo().GetCustomAttributes(typeof(TAttributeType), true).Any())
+                {
+                    types.Add(type);
+                }
+            }
+            return types;
+        }
+        public static IEnumerable<Type> FindTypesWithCustomAttribute<TAttributeType>(IEnumerable<Type> toBeEvaluatedTypes)
+        {
+            var types = new List<Type>();
+            foreach (Type type in toBeEvaluatedTypes)
             {
                 if (type.GetTypeInfo().GetCustomAttributes(typeof(TAttributeType), true).Any())
                 {

@@ -111,8 +111,8 @@ namespace WebApplication1
             services.Configure<FiltersConfig>(Configuration.GetSection(FiltersConfig.WellKnown_FilterSectionName));
 
             // Add application services.
-            services.AddTransient<Pingo.Authorization.Services.IEmailSender, Pingo.Authorization.Services.AuthMessageSender>();
-            services.AddTransient<Pingo.Authorization.Services.ISmsSender, Pingo.Authorization.Services.AuthMessageSender>();
+         //   services.AddTransient<Pingo.Authorization.Services.IEmailSender, Pingo.Authorization.Services.AuthMessageSender>();
+         //   services.AddTransient<Pingo.Authorization.Services.ISmsSender, Pingo.Authorization.Services.AuthMessageSender>();
 
 
             // Do this before we do a BuildServiceProvider because some downstream autofac modules need the librarymanager.
