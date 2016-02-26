@@ -60,7 +60,7 @@ gulp.task('copy:Pingo.Authorization:areas', function () {
     return gulp.src(['../Pingo.Authorization/Areas/**', '!../Pingo.Authorization/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
-gulp.task('watch', function () {
+gulp.task('watch', ['copy:p6.sports:areas', 'copy:p6.animals:areas', 'copy:Pingo.Authorization:areas'], function () {
     gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
     gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
     gulp.watch(['../Pingo.Authorization/Areas/**'], ['copy:Pingo.Authorization:areas']);
