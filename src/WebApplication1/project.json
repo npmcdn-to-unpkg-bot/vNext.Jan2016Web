@@ -32,7 +32,9 @@
         "Newtonsoft.Json": "8.0.2",
         "Newtonsoft.Json.Schema": "2.0.2",
         "p6.animals": "1.0.0-*",
+        "p6.main": "1.0.0-*",
         "p6.sports": "1.0.0-*",
+        "Pingo.AspNetCore.Authentication.Developer": "1.0.0-*",
         "Pingo.Authorization": "1.0.0-*",
         "Pingo.Core": "1.0.0-*",
         "Pingo.Filters": "1.0.0-*",
@@ -54,8 +56,7 @@
   },
 
   "frameworks": {
-    "dnx451": { },
-    "dnxcore50": { }
+      "dnxcore50": { }
   },
 
   "exclude": [

@@ -16,11 +16,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using Pingo.AspNetCore.Authentication.Developer;
 using Pingo.Core;
 using Pingo.Core.IoC;
 using Pingo.Core.Middleware;
 using Pingo.Core.Reflection;
 using Pingo.Core.Settings;
+using Pingo.Core.Startup;
 using Serilog;
 using Serilog.Sinks.RollingFile;
 
@@ -86,21 +88,7 @@ namespace WebApplication1
 //                options.Path = new PathString("/foo");  // defaults to "/Elm"
                 options.Filter = (name, level) => level >= LogLevel.Information;
             });
-            // Add framework services.
-            services.AddEntityFramework()
-                .AddSqlServer()
-                .AddDbContext<Pingo.Authorization.Models.ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
-
-            //services.AddIdentity<ApplicationUser, IdentityRole>()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>()
-            //    .AddDefaultTokenProviders();
-
-            services.AddIdentity<Pingo.Authorization.Models.ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<Pingo.Authorization.Models.ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
-
+       
             services.AddMvc();
             services.AddCaching(); // Memory Caching stuff
 
@@ -111,9 +99,6 @@ namespace WebApplication1
             services.Configure<FiltersConfig>(Configuration.GetSection(FiltersConfig.WellKnown_FilterSectionName));
 
             // Add application services.
-         //   services.AddTransient<Pingo.Authorization.Services.IEmailSender, Pingo.Authorization.Services.AuthMessageSender>();
-         //   services.AddTransient<Pingo.Authorization.Services.ISmsSender, Pingo.Authorization.Services.AuthMessageSender>();
-
 
             // Do this before we do a BuildServiceProvider because some downstream autofac modules need the librarymanager.
             ILibraryManager libraryManager = null;
@@ -122,10 +107,11 @@ namespace WebApplication1
 
             services.AddSingleton<IFilterProvider, Pingo.Core.Providers.OptOutOptInFilterProvider>();
 
+            services.AddAllConfigureServicesRegistrants();
+
             // autofac auto registration
             services.AddDependencies();
             var serviceProvider = services.BuildServiceProvider(Configuration);
-
 
             // Setup the PingoGlobal static .  Easier to use that trying to resolve everytime.
             var global = serviceProvider.GetService<Pingo.Core.Global>();
@@ -181,7 +167,7 @@ namespace WebApplication1
 
             app.UseStaticFiles();
 
-            app.UseIdentity();
+            app.UseIdentity().UseDeveloperAuthentication(new DeveloperOptions());
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 

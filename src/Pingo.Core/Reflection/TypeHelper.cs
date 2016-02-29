@@ -9,6 +9,11 @@ namespace Pingo.Core.Reflection
     public class TypeHelper<T> : TypeGlobals
     {
 
+        public static bool IsPublicClassType(Type type)
+        {
+            return IsType(type) && type.IsPublicClass();
+        }
+
         public static bool IsType(Type type)
         {
             return
@@ -98,7 +103,7 @@ i.e. COA.MEF.Calculator.Globalization.Views.Home, COA.MEF.Calculator.Globalizati
             }
             typesSoFar = typesSoFar.Concat(typesInAsm);
 
-            return typesSoFar.Where(type => type.IsPublicClass() && predicate(type));
+            return typesSoFar.Where(type => predicate(type));
         }
 
 

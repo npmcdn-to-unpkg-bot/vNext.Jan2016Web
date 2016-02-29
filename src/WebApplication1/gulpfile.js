@@ -48,22 +48,44 @@ gulp.task("clean:areas", function (cb) {
     rimraf(paths.areas, cb);
 });
 
+gulp.task('copy:p6.main', function () {
+    return gulp.src(['../p6.main/Views/**'])
+        .pipe(gulp.dest('Views/'));
+});
+
+gulp.task('copy:Pingo.AspNetCore.Authentication.Developer', function () {
+    return gulp.src(['../Pingo.AspNetCore.Authentication.Developer/Areas/**', '!../Pingo.AspNetCore.Authentication.Developer/Areas/*/{Controllers,Controllers/**}'])
+        .pipe(gulp.dest('Areas/'));
+});
+
 gulp.task('copy:p6.sports:areas', function () {
     return gulp.src(['../p6.sports/Areas/**', '!../p6.sports/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
+
 gulp.task('copy:p6.animals:areas', function () {
     return gulp.src(['../p6.animals/Areas/**', '!../p6.animals/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
+
 gulp.task('copy:Pingo.Authorization:areas', function () {
     return gulp.src(['../Pingo.Authorization/Areas/**', '!../Pingo.Authorization/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
-gulp.task('watch', function () {
-    gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
-    gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
-    gulp.watch(['../Pingo.Authorization/Areas/**'], ['copy:Pingo.Authorization:areas']);
-});
+
+gulp.task('watch', [
+        'copy:p6.main',
+        'copy:p6.sports:areas',
+        'copy:p6.animals:areas',
+        'copy:Pingo.Authorization:areas',
+        'copy:Pingo.AspNetCore.Authentication.Developer'
+    ],
+    function() {
+        gulp.watch(['../p6.main/Views/**'], ['copy:p6.main']);
+        gulp.watch(['../Pingo.AspNetCore.Authentication.Developer/Areas/**'], ['copy:Pingo.AspNetCore.Authentication.Developer']);
+        gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
+        gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
+        gulp.watch(['../Pingo.Authorization/Areas/**'], ['copy:Pingo.Authorization:areas']);
+    });
 
 gulp.task("min", ["min:js", "min:css"]);
