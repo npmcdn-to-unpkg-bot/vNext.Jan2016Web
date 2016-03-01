@@ -1,6 +1,24 @@
 ﻿{
-  "projects": [ "src", "test" ],
-  "sdk": {
-    "version": "1.0.0-rc1-update1"
-  }
+    "projects": [
+        "src",
+        "test"
+    ],
+    "sdk": {
+        "version": "1.0.0-rc1-update1"
+    },
+    "projectsTemp": [
+        "src",
+        "test",
+        "H:/vNext/aspnet/Security/src",
+        "H:/vNext/aspnet/mvc/src",
+        "H:/vNext/aspnet/Identity/src",
+        "H:/vNext/aspnet/Antiforgery/src",
+        "H:/vNext/aspnet/StaticFiles/src",
+        "H:/vNext/aspnet/DependencyInjection/src",
+        "H:/vNext/aspnet/Caching/src",
+        "H:/vNext/aspnet/Razor/src",
+        "H:/vNext/aspnet/Autofac/src",
+        "H:/vNext/aspnet/Autofac.Configuration/src",
+        "H:/vNext/aspnet/Newtonsoft.Json/src"
+    ]
 }

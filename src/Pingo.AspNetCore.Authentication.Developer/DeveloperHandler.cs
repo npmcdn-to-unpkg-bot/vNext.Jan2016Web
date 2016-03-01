@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication;
 using Microsoft.AspNet.Http;
@@ -48,11 +49,40 @@ namespace Pingo.AspNetCore.Authentication.Developer
             };
 
             Response.Cookies.Delete(StateCookie, cookieOptions);
-            return AuthenticateResult.Failed("Missing oauth_token");
-            //   var accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
 
+            var accessToken = new AccessToken()
+            {
+                CallBackUri = requestToken.CallBackUri,
+                CallbackConfirmed = requestToken.CallbackConfirmed,
+                Properties = requestToken.Properties,
+                ScreenName = Request.Form["_email"],
+                UserId = Request.Form["_userId"]
+            };
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
+                new Claim(ClaimTypes.Name, accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer),
+            },
+                Options.ClaimsIssuer);
+            return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, accessToken));
         }
+        protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, AccessToken token)
+        {
+            var context = new DeveloperCreatingTicketContext(Context, Options, token.UserId, token.ScreenName, token.Token, token.TokenSecret)
+            {
+                Principal = new ClaimsPrincipal(identity),
+                Properties = properties
+            };
 
+            await Options.Events.CreatingTicket(context);
+
+            if (context.Principal?.Identity == null)
+            {
+                return null;
+            }
+
+            return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
+        }
         protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)

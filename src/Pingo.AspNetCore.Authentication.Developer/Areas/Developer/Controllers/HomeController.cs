@@ -1,6 +1,7 @@
 ﻿// For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,12 @@ using Pingo.AspNetCore.Authentication.Developer.Models;
 
 namespace Pingo.AspNetCore.Authentication.Developer.Areas.Developer.Controllers
 {
+    public class AutoPostModel
+    {
+        public string URI { get; set; }
+        public Dictionary<string,string> FormDictionary = new Dictionary<string, string>();
+    }
+
     [Area("Developer")]
     public class HomeController : Controller
     {
@@ -41,7 +48,11 @@ namespace Pingo.AspNetCore.Authentication.Developer.Areas.Developer.Controllers
                 string hash = GetMd5Hash(md5Hash, model.LoginModel.Email);
                 if (VerifyMd5Hash(md5Hash, model.LoginModel.Email, hash))
                 {
-                    return Redirect(data.CallBackUri);
+                    var autoPost = new AutoPostModel {URI = data.CallBackUri};
+                    autoPost.FormDictionary.Add("_email",model.LoginModel.Email);
+                    autoPost.FormDictionary.Add("_userId", hash);
+                    return View("AutoPost",autoPost);
+//                    return Redirect(data.CallBackUri);
                 }
             }
 
