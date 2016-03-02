@@ -47,7 +47,8 @@
         "Serilog.Sinks.PeriodicBatching": "2.0.0-beta-487",
         "Serilog.Sinks.RollingFile": "2.0.0-beta-487",
         "Serilog.Sinks.TextWriter": "2.0.0-beta-487",
-        "Serilog.Sinks.Trace": "2.0.0-beta-487"
+        "Serilog.Sinks.Trace": "2.0.0-beta-487",
+        "TwitterAuth": "1.0.0-*"
     },
 
   "commands": {

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Antiforgery;
+using Microsoft.AspNet.Authentication.Twitter2;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
@@ -167,7 +168,14 @@ namespace WebApplication1
 
             app.UseStaticFiles();
 
-            app.UseIdentity().UseDeveloperAuthentication(new DeveloperOptions());
+            app.UseIdentity()
+                .UseDeveloperAuthentication(new DeveloperOptions())
+                .UseTwitter2Authentication(
+                new Twitter2Options()
+                {
+                    ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
+                    ConsumerSecret= "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
+                }                );
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 
