@@ -87,11 +87,11 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
             {
                 Options.Events = new DeveloperAuthEvents();
             }
-            if (Options.StateDataFormat == null)
+            if (DeveloperAuthOptions.StateDataFormat == null)
             {
                 var dataProtector = dataProtectionProvider.CreateProtector(
                     typeof(DeveloperAuthMiddleware).FullName, Options.AuthenticationScheme, "v1");
-                Options.StateDataFormat = new SecureDataFormat<RequestToken>(
+                DeveloperAuthOptions.StateDataFormat = new SecureDataFormat<RequestToken>(
                     new RequestTokenSerializer(),
                     dataProtector);
             }

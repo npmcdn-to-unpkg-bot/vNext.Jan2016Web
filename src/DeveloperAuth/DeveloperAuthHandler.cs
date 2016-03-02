@@ -22,11 +22,12 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
     internal class DeveloperAuthHandler : RemoteAuthenticationHandler<DeveloperAuthOptions>
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        private const string StateCookie = "__DeveloperAuthState";
+        public const string StateCookie = "__DeveloperAuthState";
+        public const string RequestTokenCookie = "__RequestToken";
         private const string RequestTokenEndpoint = "https://api.twitter.com/oauth/request_token";
         private const string AuthenticationEndpoint = "https://twitter.com/oauth/authenticate?oauth_token=";
         private const string AccessTokenEndpoint = "https://api.twitter.com/oauth/access_token";
-
+        //private const string AuthenticationEndpoint = "/Developer/Home/Authenticate?accessToken=";
         private readonly HttpClient _httpClient;
 
         public DeveloperAuthHandler(HttpClient httpClient)
@@ -40,7 +41,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
             var query = Request.Query;
             var protectedRequestToken = Request.Cookies[StateCookie];
 
-            var requestToken = Options.StateDataFormat.Unprotect(protectedRequestToken);
+            var requestToken = DeveloperAuthOptions.StateDataFormat.Unprotect(protectedRequestToken);
 
             if (requestToken == null)
             {
@@ -136,7 +137,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
                 Secure = Request.IsHttps
             };
 
-            Response.Cookies.Append(StateCookie, Options.StateDataFormat.Protect(requestToken), cookieOptions);
+            Response.Cookies.Append(StateCookie, DeveloperAuthOptions.StateDataFormat.Protect(requestToken), cookieOptions);
 
             var redirectContext = new DeveloperAuthRedirectToAuthorizationEndpointContext(
                 Context, Options,

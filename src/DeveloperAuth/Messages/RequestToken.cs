@@ -20,6 +20,10 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         /// </summary>
         public string TokenSecret { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Developer CallBackUri.
+        /// </summary>
+        public string CallBackUri { get; set; }
         public bool CallbackConfirmed { get; set; }
 
         /// <summary>

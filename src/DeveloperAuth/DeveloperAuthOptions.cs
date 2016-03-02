@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         /// <summary>
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
-        public ISecureDataFormat<RequestToken> StateDataFormat { get; set; }
+        public static ISecureDataFormat<RequestToken> StateDataFormat { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IDeveloperAuthEvents"/> used to handle authentication events.
