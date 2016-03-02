@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Antiforgery;
+using Microsoft.AspNet.Authentication.DeveloperAuth;
 using Microsoft.AspNet.Authentication.Twitter2;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
@@ -35,11 +36,11 @@ namespace WebApplication1
         {
             var RollingPath = Path.Combine(appEnvironment.ApplicationBasePath, "logs/myapp-{Date}.txt");
             Log.Logger = new LoggerConfiguration()
-                 .WriteTo.RollingFile(RollingPath)
+                .WriteTo.RollingFile(RollingPath)
                 .CreateLogger();
             Log.Information("Ah, there you are!");
 
-            var schemaJsonPath = Path.Combine(appEnvironment.ApplicationBasePath,"appsettings-filters-schema.json");
+            var schemaJsonPath = Path.Combine(appEnvironment.ApplicationBasePath, "appsettings-filters-schema.json");
             var schemaJson = File.ReadAllText(schemaJsonPath);
             JSchema schema = JSchema.Parse(schemaJson);
 
@@ -89,7 +90,7 @@ namespace WebApplication1
 //                options.Path = new PathString("/foo");  // defaults to "/Elm"
                 options.Filter = (name, level) => level >= LogLevel.Information;
             });
-       
+
             services.AddMvc();
             services.AddCaching(); // Memory Caching stuff
 
@@ -121,7 +122,8 @@ namespace WebApplication1
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env,
+            ILoggerFactory loggerFactory)
         {
             app.UseCookieAuthentication(options =>
             {
@@ -158,10 +160,12 @@ namespace WebApplication1
                         .CreateScope())
                     {
                         serviceScope.ServiceProvider.GetService<Pingo.Authorization.Models.ApplicationDbContext>()
-                             .Database.Migrate();
+                            .Database.Migrate();
                     }
                 }
-                catch { }
+                catch
+                {
+                }
             }
 
             app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
@@ -170,21 +174,26 @@ namespace WebApplication1
 
             app.UseIdentity()
                 .UseDeveloperAuthentication(new DeveloperOptions())
-                .UseTwitter2Authentication(
-                new Twitter2Options()
-                {
-                    ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
-                    ConsumerSecret= "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
-                }                );
+                .UseDeveloperAuthAuthentication(
+                    new DeveloperAuthOptions()
+                    {
+                        ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
+                        ConsumerSecret = "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
+                    }).UseTwitter2Authentication(
+                        new Twitter2Options()
+                        {
+                            ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
+                            ConsumerSecret = "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
+                        });
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                  name: "areaRoute",
-                  template: "{area:exists}/{controller}/{action}",
-                  defaults: new { action = "Index" });
+                    name: "areaRoute",
+                    template: "{area:exists}/{controller}/{action}",
+                    defaults: new {action = "Index"});
 
                 routes.MapRoute(
                     name: "default",
