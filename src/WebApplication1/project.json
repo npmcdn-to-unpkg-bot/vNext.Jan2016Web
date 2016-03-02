@@ -35,7 +35,6 @@
         "p6.animals": "1.0.0-*",
         "p6.main": "1.0.0-*",
         "p6.sports": "1.0.0-*",
-        "Pingo.AspNetCore.Authentication.Developer": "1.0.0-*",
         "Pingo.Authorization": "1.0.0-*",
         "Pingo.Core": "1.0.0-*",
         "Pingo.Filters": "1.0.0-*",

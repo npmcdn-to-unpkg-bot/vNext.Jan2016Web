@@ -18,7 +18,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
-using Pingo.AspNetCore.Authentication.Developer;
 using Pingo.Core;
 using Pingo.Core.IoC;
 using Pingo.Core.Middleware;
@@ -173,7 +172,6 @@ namespace WebApplication1
             app.UseStaticFiles();
 
             app.UseIdentity()
-                .UseDeveloperAuthentication(new DeveloperOptions())
                 .UseDeveloperAuthAuthentication(
                     new DeveloperAuthOptions()
                     {

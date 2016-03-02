@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http.Authentication;
 
 namespace Microsoft.AspNet.Authentication.DeveloperAuth
 {

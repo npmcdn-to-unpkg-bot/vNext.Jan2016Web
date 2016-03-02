@@ -24,10 +24,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         public const string StateCookie = "__DeveloperAuthState";
         public const string RequestTokenCookie = "__RequestToken";
-        private const string RequestTokenEndpoint = "https://api.twitter.com/oauth/request_token";
-        private const string AuthenticationEndpoint = "https://twitter.com/oauth/authenticate?oauth_token=";
-        private const string AccessTokenEndpoint = "https://api.twitter.com/oauth/access_token";
-        //private const string AuthenticationEndpoint = "/Developer/Home/Authenticate?accessToken=";
+        private const string AuthenticationEndpoint = "/Developer/Home/Authenticate?accessToken=";
         private readonly HttpClient _httpClient;
 
         public DeveloperAuthHandler(HttpClient httpClient)
@@ -52,23 +49,6 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
 
             // REVIEW: see which of these are really errors
 
-            var returnedToken = query["oauth_token"];
-            if (StringValues.IsNullOrEmpty(returnedToken))
-            {
-                return AuthenticateResult.Failed("Missing oauth_token");
-            }
-
-            if (!string.Equals(returnedToken, requestToken.Token, StringComparison.Ordinal))
-            {
-                return AuthenticateResult.Failed("Unmatched token");
-            }
-
-            var oauthVerifier = query["oauth_verifier"];
-            if (StringValues.IsNullOrEmpty(oauthVerifier))
-            {
-                return AuthenticateResult.Failed("Missing or blank oauth_verifier");
-            }
-
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -77,15 +57,20 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
 
             Response.Cookies.Delete(StateCookie, cookieOptions);
 
-            var accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
+            var accessToken = new AccessToken()
+            {
+                CallBackUri = requestToken.CallBackUri,
+                CallbackConfirmed = requestToken.CallbackConfirmed,
+                Properties = requestToken.Properties,
+                ScreenName = Request.Form["_email"],
+                UserId = Request.Form["_userId"]
+            };
 
             var identity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
                 new Claim(ClaimTypes.Name, accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer),
-                new Claim("urn:twitter:userid", accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
-                new Claim("urn:twitter:screenname", accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer)
-            },
+             },
             Options.ClaimsIssuer);
 
             if (Options.SaveTokensAsClaims)
@@ -126,10 +111,11 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
             {
                 properties.RedirectUri = CurrentUri;
             }
-
+            var callBackUri = BuildRedirectUri(Options.CallbackPath);
+            var requestToken = await ObtainRequestTokenAsync(callBackUri, properties);
             // If CallbackConfirmed is false, this will throw
-            var requestToken = await ObtainRequestTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, BuildRedirectUri(Options.CallbackPath), properties);
-            var twitterAuthenticationEndpoint = AuthenticationEndpoint + requestToken.Token;
+            //var requestToken = await ObtainRequestTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, BuildRedirectUri(Options.CallbackPath), properties);
+            var authenticationEndpoint = AuthenticationEndpoint + requestToken.Token;
 
             var cookieOptions = new CookieOptions
             {
@@ -141,145 +127,33 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
 
             var redirectContext = new DeveloperAuthRedirectToAuthorizationEndpointContext(
                 Context, Options,
-                properties, twitterAuthenticationEndpoint);
+                properties, authenticationEndpoint);
             await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
             return true;
         }
 
-        private async Task<RequestToken> ObtainRequestTokenAsync(string consumerKey, string consumerSecret, string callBackUri, AuthenticationProperties properties)
+        private async Task<RequestToken> ObtainRequestTokenAsync(string callBackUri, AuthenticationProperties properties)
         {
-            Logger.LogVerbose("ObtainRequestToken");
-
             var nonce = Guid.NewGuid().ToString("N");
-
-            var authorizationParts = new SortedDictionary<string, string>
+            var requestToken = new RequestToken()
             {
-                { "oauth_callback", callBackUri },
-                { "oauth_consumer_key", consumerKey },
-                { "oauth_nonce", nonce },
-                { "oauth_signature_method", "HMAC-SHA1" },
-                { "oauth_timestamp", GenerateTimeStamp() },
-                { "oauth_version", "1.0" }
+                CallBackUri = callBackUri,
+                Token = nonce,
+                Properties = properties,
+                TokenSecret = nonce,
+                CallbackConfirmed = true
             };
-
-            var parameterBuilder = new StringBuilder();
-            foreach (var authorizationKey in authorizationParts)
+            // this simulates the remote service storing the token.
+            var cookieOptions = new CookieOptions
             {
-                parameterBuilder.AppendFormat("{0}={1}&", UrlEncoder.UrlEncode(authorizationKey.Key), UrlEncoder.UrlEncode(authorizationKey.Value));
-            }
-            parameterBuilder.Length--;
-            var parameterString = parameterBuilder.ToString();
-
-            var canonicalizedRequestBuilder = new StringBuilder();
-            canonicalizedRequestBuilder.Append(HttpMethod.Post.Method);
-            canonicalizedRequestBuilder.Append("&");
-            canonicalizedRequestBuilder.Append(UrlEncoder.UrlEncode(RequestTokenEndpoint));
-            canonicalizedRequestBuilder.Append("&");
-            canonicalizedRequestBuilder.Append(UrlEncoder.UrlEncode(parameterString));
-
-            var signature = ComputeSignature(consumerSecret, null, canonicalizedRequestBuilder.ToString());
-            authorizationParts.Add("oauth_signature", signature);
-
-            var authorizationHeaderBuilder = new StringBuilder();
-            authorizationHeaderBuilder.Append("OAuth ");
-            foreach (var authorizationPart in authorizationParts)
-            {
-                authorizationHeaderBuilder.AppendFormat(
-                    "{0}=\"{1}\", ", authorizationPart.Key, UrlEncoder.UrlEncode(authorizationPart.Value));
-            }
-            authorizationHeaderBuilder.Length = authorizationHeaderBuilder.Length - 2;
-
-            var request = new HttpRequestMessage(HttpMethod.Post, RequestTokenEndpoint);
-            request.Headers.Add("Authorization", authorizationHeaderBuilder.ToString());
-
-            var response = await _httpClient.SendAsync(request, Context.RequestAborted);
-            response.EnsureSuccessStatusCode();
-            string responseText = await response.Content.ReadAsStringAsync();
-
-            var responseParameters = new FormCollection(FormReader.ReadForm(responseText));
-            if (!string.Equals(responseParameters["oauth_callback_confirmed"], "true", StringComparison.Ordinal))
-            {
-                throw new Exception("DeveloperAuth oauth_callback_confirmed is not true.");
-            }
-
-            return new RequestToken { Token = Uri.UnescapeDataString(responseParameters["oauth_token"]), TokenSecret = Uri.UnescapeDataString(responseParameters["oauth_token_secret"]), CallbackConfirmed = true, Properties = properties };
-        }
-
-        private async Task<AccessToken> ObtainAccessTokenAsync(string consumerKey, string consumerSecret, RequestToken token, string verifier)
-        {
-            // https://dev.twitter.com/docs/api/1/post/oauth/access_token
-
-            Logger.LogVerbose("ObtainAccessToken");
-
-            var nonce = Guid.NewGuid().ToString("N");
-
-            var authorizationParts = new SortedDictionary<string, string>
-            {
-                { "oauth_consumer_key", consumerKey },
-                { "oauth_nonce", nonce },
-                { "oauth_signature_method", "HMAC-SHA1" },
-                { "oauth_token", token.Token },
-                { "oauth_timestamp", GenerateTimeStamp() },
-                { "oauth_verifier", verifier },
-                { "oauth_version", "1.0" },
+                HttpOnly = true,
+                Secure = Request.IsHttps
             };
-
-            var parameterBuilder = new StringBuilder();
-            foreach (var authorizationKey in authorizationParts)
-            {
-                parameterBuilder.AppendFormat("{0}={1}&", UrlEncoder.UrlEncode(authorizationKey.Key), UrlEncoder.UrlEncode(authorizationKey.Value));
-            }
-            parameterBuilder.Length--;
-            var parameterString = parameterBuilder.ToString();
-
-            var canonicalizedRequestBuilder = new StringBuilder();
-            canonicalizedRequestBuilder.Append(HttpMethod.Post.Method);
-            canonicalizedRequestBuilder.Append("&");
-            canonicalizedRequestBuilder.Append(UrlEncoder.UrlEncode(AccessTokenEndpoint));
-            canonicalizedRequestBuilder.Append("&");
-            canonicalizedRequestBuilder.Append(UrlEncoder.UrlEncode(parameterString));
-
-            var signature = ComputeSignature(consumerSecret, token.TokenSecret, canonicalizedRequestBuilder.ToString());
-            authorizationParts.Add("oauth_signature", signature);
-            authorizationParts.Remove("oauth_verifier");
-
-            var authorizationHeaderBuilder = new StringBuilder();
-            authorizationHeaderBuilder.Append("OAuth ");
-            foreach (var authorizationPart in authorizationParts)
-            {
-                authorizationHeaderBuilder.AppendFormat(
-                    "{0}=\"{1}\", ", authorizationPart.Key, UrlEncoder.UrlEncode(authorizationPart.Value));
-            }
-            authorizationHeaderBuilder.Length = authorizationHeaderBuilder.Length - 2;
-
-            var request = new HttpRequestMessage(HttpMethod.Post, AccessTokenEndpoint);
-            request.Headers.Add("Authorization", authorizationHeaderBuilder.ToString());
-
-            var formPairs = new Dictionary<string, string>()
-            {
-                { "oauth_verifier", verifier },
-            };
-
-            request.Content = new FormUrlEncodedContent(formPairs);
-
-            var response = await _httpClient.SendAsync(request, Context.RequestAborted);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                Logger.LogError("AccessToken request failed with a status code of " + response.StatusCode);
-                response.EnsureSuccessStatusCode(); // throw
-            }
-
-            var responseText = await response.Content.ReadAsStringAsync();
-            var responseParameters = new FormCollection(FormReader.ReadForm(responseText));
-
-            return new AccessToken
-            {
-                Token = Uri.UnescapeDataString(responseParameters["oauth_token"]),
-                TokenSecret = Uri.UnescapeDataString(responseParameters["oauth_token_secret"]),
-                UserId = Uri.UnescapeDataString(responseParameters["user_id"]),
-                ScreenName = Uri.UnescapeDataString(responseParameters["screen_name"])
-            };
+            var data = DeveloperAuthOptions.StateDataFormat.Protect(requestToken);
+            var data2 = DeveloperAuthOptions.StateDataFormat.Unprotect(data);
+            // this is basically a database record entry that stores the access token.
+            Response.Cookies.Append(RequestTokenCookie, data, cookieOptions);
+            return requestToken;
         }
 
         private static string GenerateTimeStamp()

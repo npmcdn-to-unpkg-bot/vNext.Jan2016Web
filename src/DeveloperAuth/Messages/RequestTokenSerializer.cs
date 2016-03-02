@@ -20,7 +20,8 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         /// </summary>
         /// <param name="model">The token to serialize</param>
         /// <returns>A byte array containing the serialized token</returns>
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "Dispose is idempotent")]
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times",
+            Justification = "Dispose is idempotent")]
         public virtual byte[] Serialize(RequestToken model)
         {
             using (var memory = new MemoryStream())
@@ -39,7 +40,8 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         /// </summary>
         /// <param name="data">A byte array containing the serialized token</param>
         /// <returns>The DeveloperAuth request token</returns>
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "Dispose is idempotent")]
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times",
+            Justification = "Dispose is idempotent")]
         public virtual RequestToken Deserialize(byte[] data)
         {
             using (var memory = new MemoryStream(data))
@@ -71,6 +73,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
             writer.Write(FormatVersion);
             writer.Write(token.Token);
             writer.Write(token.TokenSecret);
+            writer.Write(token.CallBackUri);
             writer.Write(token.CallbackConfirmed);
             PropertiesSerializer.Default.Write(writer, token.Properties);
         }
@@ -94,6 +97,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
 
             string token = reader.ReadString();
             string tokenSecret = reader.ReadString();
+            string callBackUri = reader.ReadString();
             bool callbackConfirmed = reader.ReadBoolean();
             AuthenticationProperties properties = PropertiesSerializer.Default.Read(reader);
             if (properties == null)
@@ -101,7 +105,14 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
                 return null;
             }
 
-            return new RequestToken { Token = token, TokenSecret = tokenSecret, CallbackConfirmed = callbackConfirmed, Properties = properties };
+            return new RequestToken
+            {
+                Token = token,
+                TokenSecret = tokenSecret,
+                CallBackUri = callBackUri,
+                CallbackConfirmed = callbackConfirmed,
+                Properties = properties
+            };
         }
     }
 }

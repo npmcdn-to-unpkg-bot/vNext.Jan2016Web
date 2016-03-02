@@ -53,8 +53,8 @@ gulp.task('copy:p6.main', function () {
         .pipe(gulp.dest('Views/'));
 });
 
-gulp.task('copy:Pingo.AspNetCore.Authentication.Developer', function () {
-    return gulp.src(['../Pingo.AspNetCore.Authentication.Developer/Areas/**', '!../Pingo.AspNetCore.Authentication.Developer/Areas/*/{Controllers,Controllers/**}'])
+gulp.task('copy:DeveloperAuth', function () {
+    return gulp.src(['../DeveloperAuth/Areas/**', '!../DeveloperAuth/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
 
@@ -78,11 +78,11 @@ gulp.task('watch', [
         'copy:p6.sports:areas',
         'copy:p6.animals:areas',
         'copy:Pingo.Authorization:areas',
-        'copy:Pingo.AspNetCore.Authentication.Developer'
+        'copy:DeveloperAuth'
     ],
     function() {
         gulp.watch(['../p6.main/Views/**'], ['copy:p6.main']);
-        gulp.watch(['../Pingo.AspNetCore.Authentication.Developer/Areas/**'], ['copy:Pingo.AspNetCore.Authentication.Developer']);
+        gulp.watch(['../DeveloperAuth/Areas/**'], ['copy:DeveloperAuth']);
         gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
         gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
         gulp.watch(['../Pingo.Authorization/Areas/**'], ['copy:Pingo.Authorization:areas']);
