@@ -17,6 +17,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using P6IdentityServer4.IdentityServerApp.Configuration;
+using P6IdentityServer4.IdentityServerApp.Extensions;
 using Pingo.Core;
 using Pingo.Core.IoC;
 using Pingo.Core.Middleware;
@@ -25,17 +27,18 @@ using Pingo.Core.Settings;
 using Pingo.Core.Startup;
 using Serilog;
 using Serilog.Sinks.RollingFile;
-using WebApplication1.IdentityServerApp.Configuration;
-using WebApplication1.IdentityServerApp.Extensions;
+
 
 namespace WebApplication1
 {
     public class Startup
     {
         private readonly IApplicationEnvironment _appEnvironment;
+        private readonly IHostingEnvironment _hostingEnvironment;
         public Startup(IHostingEnvironment env, IApplicationEnvironment appEnvironment)
         {
             _appEnvironment = appEnvironment;
+            _hostingEnvironment = env;
 
             var RollingPath = Path.Combine(appEnvironment.ApplicationBasePath, "logs/myapp-{Date}.txt");
             Log.Logger = new LoggerConfiguration()
@@ -81,16 +84,8 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            var cert = new X509Certificate2(Path.Combine(_appEnvironment.ApplicationBasePath, "idsrv3test.pfx"), "idsrv3test");
-            var builder = services.AddIdentityServer(options =>
-            {
-                options.SigningCertificate = cert;
-            });
-            builder.AddInMemoryClients(Clients.Get());
-            builder.AddInMemoryScopes(Scopes.Get());
-            builder.AddInMemoryUsers(Users.Get());
-
-            builder.AddCustomGrantValidator<CustomGrantValidator>();
+            services.AddInstance<IHostingEnvironment>(_hostingEnvironment);
+            services.AddInstance<IApplicationEnvironment>(_appEnvironment);
 
             services.AddAuthentication();
             services.AddAuthorization(options =>
@@ -128,11 +123,10 @@ namespace WebApplication1
 
             services.AddSingleton<IFilterProvider, Pingo.Core.Providers.OptOutOptInFilterProvider>();
 
-            services.AddAllConfigureServicesRegistrants();
-
             services.AddTransient<ClaimsPrincipal>(
                s => s.GetService<IHttpContextAccessor>().HttpContext.User);
 
+            services.AddAllConfigureServicesRegistrants();
             // autofac auto registration
             services.AddDependencies();
             var serviceProvider = services.BuildServiceProvider(Configuration);
@@ -147,7 +141,9 @@ namespace WebApplication1
         public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
- 
+
+            app.AddAllConfigureRegistrants();
+
             app.UseCookieAuthentication(options =>
             {
                 options.AutomaticAuthenticate = true;

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using IdentityServer4.Core.Models;
 
-namespace WebApplication1.IdentityServerApp.Configuration
+namespace P6IdentityServer4.IdentityServerApp.Configuration
 {
     public class Scopes
     {

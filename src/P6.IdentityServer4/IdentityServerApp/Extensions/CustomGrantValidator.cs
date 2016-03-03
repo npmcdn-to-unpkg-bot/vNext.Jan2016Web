@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using IdentityServer4.Core.Validation;
 
-namespace WebApplication1.IdentityServerApp.Extensions
+namespace P6IdentityServer4.IdentityServerApp.Extensions
 {
     public class CustomGrantValidator : ICustomGrantValidator
     {

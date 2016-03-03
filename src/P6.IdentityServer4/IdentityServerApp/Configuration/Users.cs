@@ -4,9 +4,9 @@ using IdentityModel;
 using IdentityServer4.Core;
 using IdentityServer4.Core.Services.InMemory;
 
-namespace WebApplication1.IdentityServerApp.Configuration
+namespace P6IdentityServer4.IdentityServerApp.Configuration
 {
-    static class Users
+    static public class Users
     {
         public static List<InMemoryUser> Get()
         {
