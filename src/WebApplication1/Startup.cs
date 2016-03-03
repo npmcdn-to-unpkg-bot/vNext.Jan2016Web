@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNet.Antiforgery;
 using Microsoft.AspNet.Authentication.DeveloperAuth;
 using Microsoft.AspNet.Authentication.Twitter2;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Data.Entity;
 using Microsoft.Extensions.Configuration;
@@ -26,13 +25,18 @@ using Pingo.Core.Settings;
 using Pingo.Core.Startup;
 using Serilog;
 using Serilog.Sinks.RollingFile;
+using WebApplication1.IdentityServerApp.Configuration;
+using WebApplication1.IdentityServerApp.Extensions;
 
 namespace WebApplication1
 {
     public class Startup
     {
+        private readonly IApplicationEnvironment _appEnvironment;
         public Startup(IHostingEnvironment env, IApplicationEnvironment appEnvironment)
         {
+            _appEnvironment = appEnvironment;
+
             var RollingPath = Path.Combine(appEnvironment.ApplicationBasePath, "logs/myapp-{Date}.txt");
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.RollingFile(RollingPath)
@@ -77,6 +81,17 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            var cert = new X509Certificate2(Path.Combine(_appEnvironment.ApplicationBasePath, "idsrv3test.pfx"), "idsrv3test");
+            var builder = services.AddIdentityServer(options =>
+            {
+                options.SigningCertificate = cert;
+            });
+            builder.AddInMemoryClients(Clients.Get());
+            builder.AddInMemoryScopes(Scopes.Get());
+            builder.AddInMemoryUsers(Users.Get());
+
+            builder.AddCustomGrantValidator<CustomGrantValidator>();
+
             services.AddAuthentication();
             services.AddAuthorization(options =>
             {
@@ -91,6 +106,11 @@ namespace WebApplication1
             });
 
             services.AddMvc();
+            services.AddMvcCore().AddJsonFormatters();
+
+            services.AddWebEncoders();
+            services.AddCors();
+
             services.AddCaching(); // Memory Caching stuff
 
             // register the global configuration root 
@@ -110,6 +130,9 @@ namespace WebApplication1
 
             services.AddAllConfigureServicesRegistrants();
 
+            services.AddTransient<ClaimsPrincipal>(
+               s => s.GetService<IHttpContextAccessor>().HttpContext.User);
+
             // autofac auto registration
             services.AddDependencies();
             var serviceProvider = services.BuildServiceProvider(Configuration);
@@ -124,6 +147,7 @@ namespace WebApplication1
         public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
+ 
             app.UseCookieAuthentication(options =>
             {
                 options.AutomaticAuthenticate = true;
@@ -168,6 +192,29 @@ namespace WebApplication1
             }
 
             app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
+
+            app.UseIdentityServer();
+
+            app.UseCors(policy =>
+            {
+                policy.WithOrigins(
+                    "http://localhost:28895",
+                    "http://localhost:14016",
+                    "http://localhost:7017");
+
+                policy.AllowAnyHeader();
+                policy.AllowAnyMethod();
+            });
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            app.UseIdentityServerAuthentication(options =>
+            {
+                options.Authority = WebApplication1.IdentityServerClients.Configuration.Constants.BaseAddress;
+                options.ScopeName = "api1";
+                options.ScopeSecret = "secret";
+
+                options.AutomaticAuthenticate = true;
+                options.AutomaticChallenge = true;
+            });
 
             app.UseStaticFiles();
 
