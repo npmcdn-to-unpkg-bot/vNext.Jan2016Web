@@ -1,0 +1,147 @@
+﻿{
+    "Clients": [
+        {
+            "ClientId": "client",
+            "ClientSecrets": [
+                {
+                    "Description": "",
+                    "Expiration": "2019-02-15T00:00:00Z",
+                    "Type": "My Secret Type",
+                    "Value": "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols="
+                }
+            ],
+            "Flow": 3,
+            "AllowedScopes": [
+                "api1",
+                "api2"
+            ]
+        },
+        {
+            "ClientId": "roclient",
+            "ClientSecrets": [
+                {
+                    "Description": "",
+                    "Expiration": "2019-02-15T00:00:00Z",
+                    "Type": "My Secret Type",
+                    "Value": "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols="
+                }
+            ],
+            "Flow": 4,
+            "AllowedScopes": [
+                "openid",
+                "email",
+                "offline_access",
+                "api1",
+                "api2"
+            ]
+        },
+        {
+            "ClientId": "client.custom",
+            "ClientSecrets": [
+                {
+                    "Description": "",
+                    "Expiration": "2019-02-15T00:00:00Z",
+                    "Type": "My Secret Type",
+                    "Value": "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols="
+                }
+            ],
+            "Flow": 5,
+            "AllowedScopes": [
+                "api1",
+                "api2"
+            ]
+        },
+        {
+            "ClientId": "roclient.reference",
+            "ClientSecrets": [
+                {
+                    "Description": "",
+                    "Expiration": "2019-02-15T00:00:00Z",
+                    "Type": "My Secret Type",
+                    "Value": "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols="
+                }
+            ],
+            "Flow": 4,
+            "AllowedScopes": [
+                "api1",
+                "api2"
+            ],
+            "AccessTokenType": 1
+        },
+        {
+            "ClientId": "mvc_implicit",
+            "ClientName": "MVC Implicit",
+            "ClientUri": "http://identityserver.io",
+            "ClientSecrets": [
+                {
+                    "Description": "",
+                    "Expiration": "2019-02-15T00:00:00Z",
+                    "Type": "My Secret Type",
+                    "Value": "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols="
+                }
+            ],
+            "Flow": 1,
+            "RedirectUris": [
+                "http://localhost:44077/signin-oidc"
+            ],
+            "AllowedScopes": [
+                "api1",
+                "api2",
+                "openid",
+                "profile",
+                "email",
+                "roles"
+            ]
+        },
+        {
+            "ClientId": "js_oauth",
+            "ClientName": "JavaScript OAuth 2.0 Client",
+            "ClientUri": "http://identityserver.io",
+            "ClientSecrets": [
+                {
+                    "Description": "",
+                    "Expiration": "2019-02-15T00:00:00Z",
+                    "Type": "My Secret Type",
+                    "Value": "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols="
+                }
+            ],
+            "Flow": 1,
+            "RedirectUris": [
+                "http://localhost:28895/index.html"
+            ],
+            "AllowedScopes": [
+                "api1",
+                "api2"
+            ]
+        },
+        {
+            "ClientId": "js_oidc",
+            "ClientName": "JavaScript OIDC Client",
+            "ClientUri": "http://identityserver.io",
+            "ClientSecrets": [
+                {
+                    "Description": "",
+                    "Expiration": "2019-02-15T00:00:00Z",
+                    "Type": "My Secret Type",
+                    "Value": "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols="
+                }
+            ],
+            "Flow": 1,
+            "RedirectUris": [
+                "http://localhost:7017/index.html",
+                "http://localhost:7017/silent_renew.html"
+            ],
+            "PostLogoutRedirectUris": [
+                 "http://localhost:7017/index.html"
+            ],
+            "AllowedScopes": [
+                "api1",
+                "api2",
+                "openid",
+                "profile",
+                "email",
+                "roles"
+            ]
+        }
+    ]
+}

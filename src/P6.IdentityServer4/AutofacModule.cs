@@ -1,12 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Autofac;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
+using Microsoft.Data.Entity;
+using Microsoft.Data.Entity.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.OptionsModel;
 using Microsoft.Extensions.PlatformAbstractions;
+using P6IdentityServer4.Configuration;
 using P6IdentityServer4.IdentityServerApp.Configuration;
 using P6IdentityServer4.IdentityServerApp.Extensions;
 using Pingo.Core;
@@ -18,6 +22,17 @@ using Module = Autofac.Module;
 
 namespace P6IdentityServer4
 {
+
+
+
+    public class MyConfigureEntityFrameworkRegistrant : ConfigureEntityFrameworkRegistrant
+    {
+        public override void OnAddDbContext(EntityFrameworkServicesBuilder builder)
+        {
+
+         
+        }
+    }
     public class MyConfigureServicesRegistrant : ConfigureServicesRegistrant
     {
         public override void OnConfigureServices(IServiceCollection services)
@@ -32,7 +47,7 @@ namespace P6IdentityServer4
             {
                 options.SigningCertificate = cert;
             });
-            builder.AddInMemoryClients(Clients.Get());
+            builder.AddJsonClients(Clients.Get());
             builder.AddInMemoryScopes(Scopes.Get());
             builder.AddInMemoryUsers(Users.Get());
 
