@@ -33,12 +33,38 @@ namespace P6IdentityServer4.Services
         /// </returns>
         public Task<Client> FindClientByIdAsync(string clientId)
         {
-            var query =
-                from client in _clients
-                where client.ClientId == clientId && client.Enabled
-                select client;
+            try
+            {
+                var temp = new Client
+                {
+                    ClientId = "client",
+                    ClientSecrets = new List<Secret>
+                    {
+                        new Secret("secret".Sha256())
+                    },
 
-            return Task.FromResult(query.SingleOrDefault());
+                    Flow = Flows.ClientCredentials,
+
+                    AllowedScopes = new List<string>
+                    {
+                        "api1",
+                        "api2"
+                    }
+                };
+
+                var query =
+                    from client in _clients
+                    where client.ClientId == clientId && client.Enabled
+                    select client;
+
+                var result = query.SingleOrDefault();
+                return Task.FromResult(result);
+
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
     }
 }

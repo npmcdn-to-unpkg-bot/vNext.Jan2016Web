@@ -42,12 +42,13 @@ namespace P6IdentityServer4
             var _hostingEnvironment = services.GetService<IHostingEnvironment>();
             var _appEnvironment = services.GetService<IApplicationEnvironment>();
 
+            var jsonFilePath = Path.Combine(_appEnvironment.ApplicationBasePath, "App_Data/IdentityServer4.Clients.json");
             var cert = new X509Certificate2(Path.Combine(_appEnvironment.ApplicationBasePath, "idsrv3test.pfx"), "idsrv3test");
             var builder = services.AddIdentityServer(options =>
             {
                 options.SigningCertificate = cert;
             });
-            builder.AddJsonClients(Clients.Get());
+            builder.AddJsonClients(jsonFilePath);
             builder.AddInMemoryScopes(Scopes.Get());
             builder.AddInMemoryUsers(Users.Get());
 

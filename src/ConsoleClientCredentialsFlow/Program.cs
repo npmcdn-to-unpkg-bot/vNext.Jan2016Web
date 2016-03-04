@@ -21,6 +21,8 @@ namespace ConsoleClientCredentialsFlow
             Console.ReadLine();
             CallService(response.AccessToken);
             Console.ReadLine();
+            CallService(response.AccessToken);
+            Console.ReadLine();
         }
 
         static TokenResponse RequestToken()
