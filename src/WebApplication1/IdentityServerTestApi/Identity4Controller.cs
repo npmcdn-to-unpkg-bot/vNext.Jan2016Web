@@ -10,7 +10,7 @@ namespace WebApplication1.IdentityServerTestApi
 {
     [Route("[controller]")]
     [Authorize]
-    public class Identity4Controller
+    public class Identity4Controller: Controller
     {
         private readonly ClaimsPrincipal _caller;
 
@@ -22,8 +22,10 @@ namespace WebApplication1.IdentityServerTestApi
         [HttpGet]
         public ActionResult Get()
         {
-            return new JsonResult(_caller.Claims.Select(
-                c => new { c.Type, c.Value }));
+            var result = _caller.Claims.Select(
+                c => new {c.Type, c.Value});
+
+            return new JsonResult(result);
         }
     }
 }

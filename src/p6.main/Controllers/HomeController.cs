@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using System.Linq;
+using Microsoft.AspNet.Mvc;
+using p6.main.Models;
 
 namespace p6.main.Controllers
 {
+     
     public class HomeController : Controller
     {
         public IActionResult Index()
@@ -13,7 +16,12 @@ namespace p6.main.Controllers
         {
             ViewData["Message"] = "Your application description page.";
 
-            return View();
+            var result = HttpContext.User.Claims.Select(
+              c => new ClaimType { Type = c.Type, Value = c.Value });
+
+            //return new JsonResult(result);
+
+            return View(result);
         }
 
         public IActionResult Contact()

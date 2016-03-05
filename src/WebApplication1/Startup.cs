@@ -33,6 +33,18 @@ namespace WebApplication1
 {
     public class Startup
     {
+        public static bool isValidJson(string jsonPath, string schemaJsonPath)
+        {
+
+            var schemaJson = File.ReadAllText(schemaJsonPath);
+            JSchema schema = JSchema.Parse(schemaJson);
+            var json = File.ReadAllText(jsonPath);
+            JObject jsonO = JObject.Parse(json);
+
+            bool valid = jsonO.IsValid(schema);
+            return valid;
+        }
+
         private readonly IApplicationEnvironment _appEnvironment;
         private readonly IHostingEnvironment _hostingEnvironment;
         public Startup(IHostingEnvironment env, IApplicationEnvironment appEnvironment)
@@ -45,20 +57,6 @@ namespace WebApplication1
                 .WriteTo.RollingFile(RollingPath)
                 .CreateLogger();
             Log.Information("Ah, there you are!");
-
-            var schemaJsonPath = Path.Combine(appEnvironment.ApplicationBasePath, "appsettings-filters-schema.json");
-            var schemaJson = File.ReadAllText(schemaJsonPath);
-            JSchema schema = JSchema.Parse(schemaJson);
-
-            var schemaJsonFiltersPath = Path.Combine(appEnvironment.ApplicationBasePath, "appsettings-filters.json");
-            var schemaJsonFilters = File.ReadAllText(schemaJsonFiltersPath);
-            JObject user = JObject.Parse(schemaJsonFilters);
-
-            bool valid = user.IsValid(schema);
-            if (!valid)
-            {
-                throw new Exception("Schema Validation Failed for appsettings-filters-schema.json");
-            }
 
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()

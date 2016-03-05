@@ -19,9 +19,9 @@ namespace ConsoleClientCredentialsFlow
             var response = RequestToken();
             ShowResponse(response);
             Console.ReadLine();
-            CallService(response.AccessToken);
+            CallService(response.AccessToken, "identity4");
             Console.ReadLine();
-            CallService(response.AccessToken);
+            CallService(response.AccessToken,"Sports/Work");
             Console.ReadLine();
         }
 
@@ -34,7 +34,7 @@ namespace ConsoleClientCredentialsFlow
 
             return client.RequestClientCredentialsAsync("api1").Result;
         }
-        static void CallService(string token)
+        static void CallService(string token, string path)
         {
             var baseAddress = Constants.AspNetWebApiSampleApi;
 
@@ -44,7 +44,7 @@ namespace ConsoleClientCredentialsFlow
             };
 
             client.SetBearerToken(token);
-            var response = client.GetStringAsync("identity4").Result;
+            var response = client.GetStringAsync(path).Result;
 
             "\n\nService claims:".ConsoleGreen();
             Console.WriteLine(JArray.Parse(response));

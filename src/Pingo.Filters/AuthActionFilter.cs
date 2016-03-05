@@ -2,6 +2,8 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.AspNet.Routing;
 using Microsoft.Extensions.Configuration;
+using System.Linq;
+using System.Security.Claims;
 
 namespace Pingo.Filters
 {
@@ -33,8 +35,18 @@ namespace Pingo.Filters
                     });
 
                 context.Result = new RedirectToRouteResult(rtrr);
-
             }
+            else
+            {
+                var result = from claim in context.HttpContext.User.Claims
+                             where claim.Type == ClaimTypes.NameIdentifier
+                             select claim;
+                if (!result.Any())
+                {
+                    context.Result = new HttpUnauthorizedResult();
+                }
+            }
+
             base.OnActionExecuting(context);
         }
     }
