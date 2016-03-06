@@ -53,6 +53,16 @@ gulp.task('copy:p6.main', function () {
         .pipe(gulp.dest('Views/'));
 });
 
+gulp.task('copy:p6.main:areas', function () {
+    return gulp.src(['../p6.main/Areas/**', '!../p6.main/Areas/*/{Controllers,Controllers/**}'])
+        .pipe(gulp.dest('Areas/'));
+});
+
+gulp.task('copy:p6.sports:areas', function () {
+    return gulp.src(['../p6.main/Areas/**', '!../p6.main/Areas/*/{Controllers,Controllers/**}'])
+        .pipe(gulp.dest('Areas/'));
+});
+
 gulp.task('copy:DeveloperAuth', function () {
     return gulp.src(['../DeveloperAuth/Areas/**', '!../DeveloperAuth/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
@@ -75,6 +85,7 @@ gulp.task('copy:Pingo.Authorization:areas', function () {
 
 gulp.task('watch', [
         'copy:p6.main',
+        'copy:p6.main:areas',
         'copy:p6.sports:areas',
         'copy:p6.animals:areas',
         'copy:Pingo.Authorization:areas',
@@ -82,6 +93,7 @@ gulp.task('watch', [
     ],
     function() {
         gulp.watch(['../p6.main/Views/**'], ['copy:p6.main']);
+        gulp.watch(['../p6.main/Areas/**'], ['copy:p6.main:areas']);
         gulp.watch(['../DeveloperAuth/Areas/**'], ['copy:DeveloperAuth']);
         gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
         gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);

@@ -36,6 +36,7 @@
         "Newtonsoft.Json": "8.0.2",
         "Newtonsoft.Json.Schema": "2.0.2",
         "p6.animals": "1.0.0-*",
+        "p6.api.animals.v1": "1.0.0-*",
         "P6.IdentityServer4": "1.0.0-*",
         "p6.main": "1.0.0-*",
         "p6.sports": "1.0.0-*",

@@ -4,7 +4,7 @@ using p6.main.Models;
 
 namespace p6.main.Controllers
 {
-     
+     [Area("Main")]
     public class HomeController : Controller
     {
         public IActionResult Index()
