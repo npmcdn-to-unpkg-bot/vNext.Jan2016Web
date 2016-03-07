@@ -18,6 +18,7 @@
         }
     },
     "dependencies": {
-        "Microsoft.AspNet.Mvc": "6.0.0-rc1-final"
+        "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+        "Swashbuckle.SwaggerGen": "6.0.0-rc1-final"
     }
 }

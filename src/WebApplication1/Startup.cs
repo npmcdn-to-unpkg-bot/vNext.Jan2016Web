@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using Basic.Swagger;
 using Microsoft.AspNet.Antiforgery;
 using Microsoft.AspNet.Authentication.DeveloperAuth;
 using Microsoft.AspNet.Authentication.Twitter2;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Serialization;
 using P6IdentityServer4.IdentityServerApp.Configuration;
 using P6IdentityServer4.IdentityServerApp.Extensions;
 using Pingo.Core;
@@ -27,6 +29,8 @@ using Pingo.Core.Settings;
 using Pingo.Core.Startup;
 using Serilog;
 using Serilog.Sinks.RollingFile;
+using Swashbuckle.SwaggerGen.Generator;
+using System.Linq;
 
 
 namespace WebApplication1
@@ -98,8 +102,37 @@ namespace WebApplication1
                 options.Filter = (name, level) => level >= LogLevel.Information;
             });
 
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
             services.AddMvcCore().AddJsonFormatters();
+            services.AddSwaggerGen(c =>
+            {
+                c.SingleApiVersion(new Info
+                {
+                    Version = "v1",
+                    Title = "Swashbuckle Sample API",
+                    Description = "A sample API for testing Swashbuckle",
+                    TermsOfService = "Some terms ..."
+                });
+
+                c.DescribeAllEnumsAsStrings();
+
+                c.OperationFilter<AssignOperationVendorExtensions>();
+            });
+
+            if (_hostingEnvironment.IsDevelopment())
+            {
+                services.ConfigureSwaggerGen(c =>
+                {
+                    c.IncludeXmlComments(string.Format(@"{0}\artifacts\bin\WebApplication1\{1}\{2}{3}\WebApplication1.xml",
+                        GetSolutionBasePath(),
+                        _appEnvironment.Configuration,
+                        _appEnvironment.RuntimeFramework.Identifier,
+                        _appEnvironment.RuntimeFramework.Version.ToString().Replace(".", string.Empty)));
+                });
+            }
 
             services.AddWebEncoders();
             services.AddCors();
@@ -238,9 +271,24 @@ namespace WebApplication1
                     name: "default",
                     template: "{area=Main}/{controller=Home}/{action=Index}/{id?}");
             });
-        }
 
+            app.UseSwaggerGen();
+            app.UseSwaggerUi();
+        }
+        private string GetSolutionBasePath()
+        {
+            var dir = Directory.CreateDirectory(_appEnvironment.ApplicationBasePath);
+            while (dir.Parent != null)
+            {
+                if (dir.GetFiles("global.json").Any())
+                    return dir.FullName;
+
+                dir = dir.Parent;
+            }
+            throw new InvalidOperationException("Failed to detect solution base path - global.json not found.");
+        }
         // Entry point for the application.
         public static void Main(string[] args) => WebApplication.Run<Startup>(args);
     }
+
 }

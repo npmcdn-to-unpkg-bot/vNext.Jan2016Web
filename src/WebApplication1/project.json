@@ -53,6 +53,7 @@
         "Serilog.Sinks.RollingFile": "2.0.0-beta-487",
         "Serilog.Sinks.TextWriter": "2.0.0-beta-487",
         "Serilog.Sinks.Trace": "2.0.0-beta-487",
+        "Swashbuckle.SwaggerUi": "6.0.0-rc1-final",
         "TwitterAuth": "1.0.0-*"
     },
 
@@ -61,9 +62,9 @@
     "ef": "EntityFramework.Commands"
   },
 
-  "frameworks": {
-      "dnxcore50": { }
-  },
+    "frameworks": {
+        "dnxcore50": { }
+    },
 
   "exclude": [
     "wwwroot",
