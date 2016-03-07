@@ -8,6 +8,7 @@ using Microsoft.AspNet.Mvc;
 
 namespace WebApplication1.IdentityServerTestApi
 {
+    [Area("api")]
     [Route("[controller]")]
     [Authorize]
     public class Identity4Controller: Controller
