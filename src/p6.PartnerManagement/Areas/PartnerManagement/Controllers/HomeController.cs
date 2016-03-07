@@ -10,7 +10,7 @@ namespace p6.PartnerManagement.Areas.PartnerManagement.Controllers
         // GET: /<controller>/
         public IActionResult Index()
         {
-            var s = "";
+          
             return View();
         }
     }
