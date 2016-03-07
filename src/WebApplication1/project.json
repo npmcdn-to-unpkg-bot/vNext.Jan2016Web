@@ -39,6 +39,7 @@
         "p6.api.animals.v1": "1.0.0-*",
         "P6.IdentityServer4": "1.0.0-*",
         "p6.main": "1.0.0-*",
+        "p6.PartnerManagement": "1.0.0-*",
         "p6.sports": "1.0.0-*",
         "Pingo.Authorization": "1.0.0-*",
         "Pingo.Core": "1.0.0-*",
@@ -53,6 +54,7 @@
         "Serilog.Sinks.RollingFile": "2.0.0-beta-487",
         "Serilog.Sinks.TextWriter": "2.0.0-beta-487",
         "Serilog.Sinks.Trace": "2.0.0-beta-487",
+        "Swashbuckle.SwaggerGen": "6.0.0-rc1-final",
         "Swashbuckle.SwaggerUi": "6.0.0-rc1-final",
         "TwitterAuth": "1.0.0-*"
     },

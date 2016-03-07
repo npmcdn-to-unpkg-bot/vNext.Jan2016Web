@@ -42,6 +42,10 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Swashbuckle.SwaggerGen", "s
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Swashbuckle.SwaggerUi", "src\Swashbuckle.SwaggerUi\Swashbuckle.SwaggerUi.xproj", "{1C14CC40-1D89-4DA9-A1D8-237FD8922371}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PartnerManagement", "PartnerManagement", "{0F0A4DA2-F525-4F3C-9B39-870C97E9029F}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "p6.PartnerManagement", "src\p6.PartnerManagement\p6.PartnerManagement.xproj", "{AEBD3A6E-374D-4052-B585-A3950A7F09C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +108,10 @@ Global
 		{1C14CC40-1D89-4DA9-A1D8-237FD8922371}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C14CC40-1D89-4DA9-A1D8-237FD8922371}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C14CC40-1D89-4DA9-A1D8-237FD8922371}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEBD3A6E-374D-4052-B585-A3950A7F09C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEBD3A6E-374D-4052-B585-A3950A7F09C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEBD3A6E-374D-4052-B585-A3950A7F09C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEBD3A6E-374D-4052-B585-A3950A7F09C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,5 +131,7 @@ Global
 		{4E3A67AE-DFFA-4805-BDC6-4B3C5F42F247} = {B01519A7-39F9-498C-ACEA-588E7F8FA54B}
 		{95768E0A-1B94-4FC3-9DB0-11C1D7DBD4A4} = {1E880CEB-4394-4573-B546-EC0BD84F55D6}
 		{E62DB2DE-5080-4855-B1AA-6F4BD819D723} = {95768E0A-1B94-4FC3-9DB0-11C1D7DBD4A4}
+		{0F0A4DA2-F525-4F3C-9B39-870C97E9029F} = {1E880CEB-4394-4573-B546-EC0BD84F55D6}
+		{AEBD3A6E-374D-4052-B585-A3950A7F09C3} = {0F0A4DA2-F525-4F3C-9B39-870C97E9029F}
 	EndGlobalSection
 EndGlobal

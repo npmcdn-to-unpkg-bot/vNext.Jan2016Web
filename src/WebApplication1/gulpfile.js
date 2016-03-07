@@ -58,6 +58,11 @@ gulp.task('copy:p6.main:areas', function () {
         .pipe(gulp.dest('Areas/'));
 });
 
+gulp.task('copy:p6.PartnerManagement:areas', function () {
+    return gulp.src(['../p6.PartnerManagement/Areas/**', '!../p6.PartnerManagement/Areas/*/{Controllers,Controllers/**}'])
+        .pipe(gulp.dest('Areas/'));
+});
+
 gulp.task('copy:p6.sports:areas', function () {
     return gulp.src(['../p6.main/Areas/**', '!../p6.main/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
@@ -83,9 +88,13 @@ gulp.task('copy:Pingo.Authorization:areas', function () {
         .pipe(gulp.dest('Areas/'));
 });
 
+
+
+
 gulp.task('watch', [
         'copy:p6.main',
         'copy:p6.main:areas',
+        'copy:p6.PartnerManagement:areas',
         'copy:p6.sports:areas',
         'copy:p6.animals:areas',
         'copy:Pingo.Authorization:areas',
@@ -94,6 +103,7 @@ gulp.task('watch', [
     function() {
         gulp.watch(['../p6.main/Views/**'], ['copy:p6.main']);
         gulp.watch(['../p6.main/Areas/**'], ['copy:p6.main:areas']);
+        gulp.watch(['../p6.PartnerManagement/Areas/**'], ['copy:p6.PartnerManagement:areas']);
         gulp.watch(['../DeveloperAuth/Areas/**'], ['copy:DeveloperAuth']);
         gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
         gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
