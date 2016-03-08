@@ -1,0 +1,26 @@
+{
+  "name": "Hello.Polymer",
+  "version": "0.0.0",
+  "homepage": "https://github.com/ghstahl/vNext.Jan2016Web",
+  "authors": [
+    "ghstahl@gmail.com <ghstahl@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~1.3.1",
+    "iron-elements": "polymerelements/iron-elements#^1.0.8",
+    "paper-elements": "polymerelements/paper-elements#^1.0.7",
+    "page": "^1.6.4",
+    "expandjs": "ExpandJS/expandjs#^0.10.0",
+    "mat-elements": "ExpandJS/mat-elements#^0.10.0",
+    "xp-elements": "ExpandJS/xp-elements#^0.10.0",
+    "google-map": "^1.1.10"
+  }
+}

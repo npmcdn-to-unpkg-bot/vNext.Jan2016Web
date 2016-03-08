@@ -1,0 +1,36 @@
+{
+  "name": "xp-i18n-behavior",
+  "license": "BSD-3-Clause",
+  "version": "0.10.0",
+  "main": "xp-i18n-behavior.html",
+  "description": "A behavior used to add localization capabilities on a custom element",
+  "homepage": "http://expandjs.com/elements/xp-i18n-behavior",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "expandjs",
+    "web app",
+    "custom elements",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs#0.10.0",
+    "xp-shared-behavior": "ExpandJS/xp-shared-behavior#0.10.0",
+    "polymer": "Polymer/polymer#^1.2.0"
+  },
+  "_release": "0.10.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.10.0",
+    "commit": "c15249f77f942893d65118d98feb5775b86b508c"
+  },
+  "_source": "git://github.com/ExpandJS/xp-i18n-behavior.git",
+  "_target": "0.10.0",
+  "_originalSource": "ExpandJS/xp-i18n-behavior"
+}

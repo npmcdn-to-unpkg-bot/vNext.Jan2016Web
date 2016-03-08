@@ -1,0 +1,80 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A behavior used to add localization capabilities on a custom element.
+
+@behavior xp-i18n-behavior
+@description A behavior used to add localization capabilities on a custom element
+@keywords expandjs, web app, custom elements, web-components
+@group behaviors
+@hot
+
+@homepage http://expandjs.com/elements/xp-i18n-behavior
+@repository https://github.com/ExpandJS/xp-i18n-behavior
+
+@behavior xp-shared-behavior /bower_components/xp-shared-behavior/xp-shared-behavior.html
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-shared-behavior ExpandJS/xp-shared-behavior#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../xp-shared-behavior/xp-shared-behavior.html">
+
+<script>
+    Polymer.XPI18nBehaviorImp = {
+
+        /**
+         * Translates a string, an array or an object using a map, `locale`, and returns the localized values.
+         *
+         * @method localize
+         * @param {Array | Object | string} [string = ""]
+         * @param {Object} [locale]
+         * @returns {Array | Object | string}
+         */
+        localize: function (string, locale) {
+            return XP.localize(string, locale);
+        },
+
+        /*********************************************************************/
+
+        // PROPERTIES
+        properties: {
+
+            /**
+             * The current locale.
+             *
+             * @attribute locale
+             * @type Object
+             * @notifies
+             * @readonly
+             */
+            locale: {
+                computed: '_computeLocale(shared.*)',
+                notify: true,
+                type: Object
+            }
+        },
+
+        /*********************************************************************/
+
+        // COMPUTER
+        _computeLocale: function () {
+            var language = this.shared.language, locale = this.shared.locale;
+            return (locale && language && locale[language]) || null;
+        }
+    };
+
+    Polymer.XPI18nBehavior = [
+        Polymer.XPSharedBehavior,
+        Polymer.XPI18nBehaviorImp
+    ];
+</script>

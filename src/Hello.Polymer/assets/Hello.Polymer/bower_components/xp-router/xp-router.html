@@ -1,0 +1,182 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A custom element used to perform client side routing.
+
+It must be used in conjunction with
+[xp-route](http://expandjs.com/elements/xp-route).
+
+@element xp-router
+@description A custom element used to perform client side routing
+@keywords expandjs, web app, custom elements, web-components
+@group navigation
+@hot
+
+@homepage http://expandjs.com/elements/xp-router
+@repository https://github.com/ExpandJS/xp-router
+
+@behavior xp-selector-behavior /bower_components/xp-selector/xp-selector-behavior.html
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-selector ExpandJS/xp-selector#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../xp-selector/xp-selector-behavior.html">
+<link rel="import" href="xp-route.html">
+
+<script src="dist/xp-router.min.js"></script>
+
+<dom-module id="xp-router">
+
+    <template strip-whitespace>
+
+        <style>
+            :host {
+                display: none !important;
+            }
+        </style>
+
+        <content></content>
+
+    </template>
+
+    <script>
+        Polymer({
+
+            // ELEMENT
+            is: 'xp-router',
+
+            // BEHAVIORS
+            behaviors: [
+                Polymer.XPSelectorBehavior
+            ],
+
+            /*********************************************************************/
+
+            // PROPERTIES
+            properties: {
+
+                /**
+                 * The selected route's params.
+                 *
+                 * @attribute params
+                 * @type Object
+                 * @notifies
+                 * @readonly
+                 */
+                params: {
+                    notify: true,
+                    readOnly: true,
+                    type: Object
+                },
+
+                /**
+                 * The selector used to recognize items.
+                 *
+                 * @attribute item-selector
+                 * @type string
+                 * @default ".route"
+                 */
+                itemSelector: {
+                    reflectToAttribute: true,
+                    type: String,
+                    value: '.route'
+                },
+
+                /**
+                 * The router instance.
+                 *
+                 * @attribute router
+                 * @type Object
+                 * @notifies
+                 * @readonly
+                 */
+                router: {
+                    notify: true,
+                    readOnly: true
+                },
+
+                /**
+                 * If set to true, the router is running.
+                 *
+                 * @attribute running
+                 * @type boolean
+                 * @default false
+                 * @notifies
+                 * @readonly
+                 */
+                running: {
+                    notify: true,
+                    readOnly: true,
+                    type: Boolean,
+                    value: false
+                }
+            },
+
+            /*********************************************************************/
+
+            // OBSERVER
+            _itemsObserver: function () {
+
+                // Vars
+                var self = this;
+
+                // Super
+                Polymer.XPSelectorBehaviorImp._itemsObserver.apply(self, arguments);
+
+                // Checking
+                if (self.running || !self.items || !self.items.length) { return; }
+
+                // Routing
+                self.async(function () { self.items.forEach(function (route) { self.router.on(route.path, self._handleRoute.bind(self, route)); }); });
+
+                // Running
+                self._setRunning(!!self.router.run());
+            },
+
+            /*********************************************************************/
+
+            // LISTENER
+            created: function () {
+
+                // Classifying
+                this.classList.add('router');
+            },
+
+            // LISTENER
+            ready: function () {
+
+                // Setting
+                this._setRouter(new XPRouter());
+            },
+
+            /*********************************************************************/
+
+            // HANDLER
+            _handleRoute: function (route, params) {
+
+                // Vars
+                var self = this;
+
+                // Redirecting
+                if (route.redirect) { return XP.redirect(route.redirect, true); }
+
+                // Setting
+                XP.delay(self._setParams.bind(self, params));
+
+                // Selecting
+                XP.delay(self.select.bind(self, route, true));
+            }
+        });
+    </script>
+
+</dom-module>

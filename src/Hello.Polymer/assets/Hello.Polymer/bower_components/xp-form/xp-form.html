@@ -1,0 +1,399 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A custom element used to improve the standard HTML form with XHR and validation capabilities.
+
+It should be used in conjunction with custom inputs which have
+[xp-input-behavior](http://expandjs.com/elements/xp-input-behavior).
+
+@element xp-form
+@description A custom element used to improve the standard HTML form with XHR and validation capabilities
+@keywords expandjs, web app, custom elements, web-components
+@group inputs
+@hot
+
+@homepage http://expandjs.com/elements/xp-form
+@repository https://github.com/ExpandJS/xp-form
+
+@extends form
+@behavior xp-array-behavior /bower_components/xp-array-behavior/xp-array-behavior.html
+@behavior xp-refirer-behavior /bower_components/xp-refirer-behavior/xp-refirer-behavior.html
+@behavior xp-targeter-behavior /bower_components/xp-targeter-behavior/xp-targeter-behavior.html
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-array-behavior ExpandJS/xp-array-behavior#0.10.0
+@dependency xp-refirer-behavior ExpandJS/xp-refirer-behavior#0.10.0
+@dependency xp-request ExpandJS/xp-request#0.10.0
+@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../xp-array-behavior/xp-array-behavior.html">
+<link rel="import" href="../xp-refirer-behavior/xp-refirer-behavior.html">
+<link rel="import" href="../xp-request/xp-request.html">
+<link rel="import" href="../xp-targeter-behavior/xp-targeter-behavior.html">
+
+<dom-module id="xp-form">
+
+    <template strip-whitespace>
+
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+
+        <xp-request content-type="[[contentType]]" headers="{{headers}}" hostname="[[hostname]]"
+                    keep-alive="[[keepAlive]]" path="[[path]]" port="[[port]]" protocol="[[protocol]]"
+                    response-type="[[responseType]]" on-xp-request-chunk="_handleStop"
+                    on-xp-request-data="_handleRefire" on-xp-request-error="_handleRefire"
+                    on-xp-request-response="_handleStop" on-xp-request-state="_handleStop"
+                    on-xp-request-submit="_handleRefire"></xp-request>
+
+        <content></content>
+
+    </template>
+
+    <script>
+        Polymer({
+
+            // ELEMENT
+            is: 'xp-form',
+
+            // EXTENDS
+            extends: 'form',
+
+            // BEHAVIORS
+            behaviors: [
+                Polymer.XPArrayBehavior,
+                Polymer.XPRefirerBehavior,
+                Polymer.XPTargeterBehavior
+            ],
+
+            /*********************************************************************/
+
+            /**
+             * Fired when data are received.
+             *
+             * @event xp-form-data
+             * @param {Element} firer
+             * @param {*} data
+             * @bubbles
+             */
+
+            /**
+             * Fired when an error is received.
+             *
+             * @event xp-form-error
+             * @param {Element} firer
+             * @param {string} error
+             * @bubbles
+             */
+
+            /**
+             * Fired when submit is prevented due to invalid inputs.
+             *
+             * @event xp-form-invalid
+             * @param {Element} firer
+             * @param {Element} input
+             * @bubbles
+             */
+
+            /**
+             * Fired when data are about to be submitted.
+             *
+             * @event xp-form-submit
+             * @param {Element} firer
+             * @param {Object} data
+             * @bubbles
+             * @cancelable
+             */
+
+            /*********************************************************************/
+
+            /**
+             * Parses the form's inputs.
+             *
+             * @method parse
+             * @returns {Object}
+             */
+            parse: function () {
+
+                // Vars
+                var self = this,
+                    data = XP.merge(XP.cloneDeep(self.formData || {}), XP.formData(Polymer.dom(self)));
+
+                // Polishing
+                return XP.merge(data, data, XP.toNull);
+            },
+
+            /**
+             * Submits the form's data through XHR.
+             *
+             * @method submit
+             * @param {Function} [callback]
+             * @returns {Promise}
+             */
+            submit: function (callback) {
+
+                // Vars
+                var self     = this,
+                    target   = self.target ? self.findTarget() : self.request,
+                    validity = !self.noValidate && XP.invoke(XP.map(self.inputs, 'adapter'), 'validate'),
+                    invalid  = !self.noValidate && XP.find(self.inputs, XP.isInvalid);
+
+                // Setting
+                self._setInvalid(!!invalid);
+
+                // Firing
+                if (invalid) { self.fire('xp-form-invalid', {firer: self, input: invalid}); return null; }
+
+                // Submitting
+                return target && target.submit(self.parse(), callback);
+            },
+
+            /*********************************************************************/
+
+            // LISTENERS
+            listeners: {
+                'change': '_handleChange',
+                'input': '_handleChange',
+                'submit': '_handleSubmit',
+                'xp-input-change': '_handleChange'
+            },
+
+            // OBSERVERS
+            observers: [
+                '_handleChange(inputs.*)'
+            ],
+
+            // PROPERTIES
+            properties: {
+
+                /**
+                 * Content type to be used when sending data.
+                 *
+                 * @attribute content-type
+                 * @type string
+                 * @default "application/x-www-form-urlencoded"
+                 */
+                contentType: {
+                    type: String,
+                    value: 'application/x-www-form-urlencoded'
+                },
+
+                /**
+                 * The form's default data, overridden by the inputs values.
+                 *
+                 * @attribute form-data
+                 * @type Object
+                 * @notifies
+                 */
+                formData: {
+                    notify: true,
+                    type: Object,
+                    value: function () { return {}; }
+                },
+
+                /**
+                 * An object containing request headers.
+                 *
+                 * @attribute headers
+                 * @type Object
+                 * @notifies
+                 */
+                headers: {
+                    notify: true,
+                    type: Object
+                },
+
+                /**
+                 * The request hostname, useful for relative requests.
+                 *
+                 * @attribute hostname
+                 * @type string
+                 */
+                hostname: {
+                    type: String
+                },
+
+                /**
+                 * The found inputs.
+                 *
+                 * @attribute inputs
+                 * @type Array
+                 * @notifies
+                 * @readonly
+                 */
+                inputs: {
+                    notify: true,
+                    readOnly: true,
+                    value: function () { return []; }
+                },
+
+                /**
+                 * If set to true, an input's value is not valid.
+                 *
+                 * @attribute invalid
+                 * @type boolean
+                 * @default false
+                 * @notifies
+                 * @readonly
+                 */
+                invalid: {
+                    notify: true,
+                    readOnly: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * How often to submit TCP KeepAlive packets over sockets being kept alive.
+                 *
+                 * @attribute keep-alive
+                 * @type number
+                 * @default 0
+                 */
+                keepAlive: {
+                    type: Number,
+                    value: 0
+                },
+
+                /**
+                 * The request path, useful for relative requests.
+                 *
+                 * @attribute path
+                 * @type string
+                 */
+                path: {
+                    type: String
+                },
+
+                /**
+                 * The request port, useful for relative requests.
+                 *
+                 * @attribute port
+                 * @type number
+                 */
+                port: {
+                    type: Number
+                },
+
+                /**
+                 * The request protocol, useful for relative requests.
+                 *
+                 * @attribute protocol
+                 * @type string
+                 */
+                protocol: {
+                    type: String
+                },
+
+                /**
+                 * The form's request.
+                 *
+                 * @attribute request
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                request: {
+                    notify: true,
+                    readOnly: true
+                },
+
+                /**
+                 * The type of data expected back from the server.
+                 *
+                 * @attribute response-type
+                 * @type string
+                 */
+                responseType: {
+                    type: String
+                }
+            },
+
+            /*********************************************************************/
+
+            // LISTENER
+            created: function () {
+
+                // Classifying
+                this.classList.add('form');
+            },
+
+            // LISTENER
+            mutated: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self.request.method = self.method;
+                self.request.url    = self.action;
+
+                // Finding
+                self.overwrite('inputs', XP.getElements(Polymer.dom(self), 'input[name]:not([name=""]):not([type="button"]):not([type="image"]):not([type="reset"]):not([type="submit"]),select[name]:not([name=""]),textarea[name]:not([name=""])'));
+
+                // Observing
+                XP.onMutation(self, self.mutated.bind(self), {attributes: true, attributeFilter: ['action', 'method', 'name'], childList: true, subtree: true});
+            },
+
+            // LISTENER
+            ready: function () {
+
+                // Vars
+                var self = this;
+
+                // Setting
+                self._setRequest(Polymer.dom(self.root).querySelector('.request'));
+
+                // Mutating
+                self.mutated();
+            },
+
+            /*********************************************************************/
+
+            // HANDLER
+            _handleChange: function () {
+
+                // Setting
+                this._setInvalid(!this.noValidate && !!XP.find(this.inputs, XP.isInvalid));
+            },
+
+            // HANDLER
+            _handleRefire: function (event) {
+
+                // Refiring
+                this.refire(event, event.type.replace('xp-request-', 'xp-form-'), {firer: this});
+            },
+
+            // HANDLER
+            _handleStop: function (event) {
+
+                // Stopping
+                event.stopPropagation();
+            },
+
+            // HANDLER
+            _handleSubmit: function (event) {
+
+                // Preventing
+                event.preventDefault();
+
+                // Overriding
+                this.submit();
+            }
+        });
+    </script>
+
+</dom-module>

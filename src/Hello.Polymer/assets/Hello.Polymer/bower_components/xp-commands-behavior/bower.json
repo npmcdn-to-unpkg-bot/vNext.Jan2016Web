@@ -1,0 +1,28 @@
+{
+  "name": "xp-commands-behavior",
+  "license": "BSD-3-Clause",
+  "version": "0.10.0",
+  "main": "xp-commands-behavior.html",
+  "description": "A behavior used to manage the application's commands",
+  "homepage": "http://expandjs.com/elements/xp-commands-behavior",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "expandjs",
+    "web app",
+    "custom elements",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs#0.10.0",
+    "xp-array-behavior": "ExpandJS/xp-array-behavior#0.10.0",
+    "xp-refirer-behavior": "ExpandJS/xp-refirer-behavior#0.10.0",
+    "polymer": "Polymer/polymer#^1.2.0"
+  }
+}

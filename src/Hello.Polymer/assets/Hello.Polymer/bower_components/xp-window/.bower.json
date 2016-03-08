@@ -1,0 +1,36 @@
+{
+  "name": "xp-window",
+  "license": "BSD-3-Clause",
+  "version": "0.10.0",
+  "main": "xp-window.html",
+  "description": "A custom element used to get interact with the browser window",
+  "homepage": "http://expandjs.com/elements/xp-window",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "expandjs",
+    "web app",
+    "custom elements",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs#0.10.0",
+    "xp-array-behavior": "ExpandJS/xp-array-behavior#0.10.0",
+    "polymer": "Polymer/polymer#^1.2.0"
+  },
+  "_release": "0.10.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.10.0",
+    "commit": "d334c6ba749922979c4202e096958038654923cb"
+  },
+  "_source": "git://github.com/ExpandJS/xp-window.git",
+  "_target": "0.10.0",
+  "_originalSource": "ExpandJS/xp-window"
+}

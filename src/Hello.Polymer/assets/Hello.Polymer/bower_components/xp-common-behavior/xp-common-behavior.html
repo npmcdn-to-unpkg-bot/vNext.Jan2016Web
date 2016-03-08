@@ -1,0 +1,89 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A behavior used to merge common application behaviors.
+
+@behavior xp-common-behavior
+@description A behavior used to merge common application behaviors
+@keywords expandjs, web app, custom elements, web-components
+@group behaviors
+@hot
+
+@homepage http://expandjs.com/elements/xp-common-behavior
+@repository https://github.com/ExpandJS/xp-common-behavior
+
+@behavior xp-array-behavior /bower_components/xp-array-behavior/xp-array-behavior.html
+@behavior xp-commands-behavior /bower_components/xp-commands-behavior/xp-commands-behavior.html
+@behavior xp-i18n-behavior /bower_components/xp-i18n-behavior/xp-i18n-behavior.html
+@behavior xp-refirer-behavior /bower_components/xp-refirer-behavior/xp-refirer-behavior.html
+@behavior xp-shared-behavior /bower_components/xp-shared-behavior/xp-shared-behavior.html
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-array-behavior ExpandJS/xp-array-behavior#0.10.0
+@dependency xp-commands-behavior ExpandJS/xp-commands-behavior#0.10.0
+@dependency xp-i18n-behavior ExpandJS/xp-i18n-behavior#0.10.0
+@dependency xp-object-behavior ExpandJS/xp-object-behavior#0.10.0
+@dependency xp-refirer-behavior ExpandJS/xp-refirer-behavior#0.10.0
+@dependency xp-shared-behavior ExpandJS/xp-shared-behavior#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../xp-array-behavior/xp-array-behavior.html">
+<link rel="import" href="../xp-commands-behavior/xp-commands-behavior.html">
+<link rel="import" href="../xp-i18n-behavior/xp-i18n-behavior.html">
+<link rel="import" href="../xp-object-behavior/xp-object-behavior.html">
+<link rel="import" href="../xp-refirer-behavior/xp-refirer-behavior.html">
+<link rel="import" href="../xp-shared-behavior/xp-shared-behavior.html">
+
+<script>
+    Polymer.XPCommonBehaviorImp = {
+
+        // PROPERTIES
+        properties: {
+
+            /**
+             * The shared schema.
+             *
+             * @attribute schema
+             * @type Object
+             * @notifies
+             * @readonly
+             */
+            schema: {
+                computed: '_computeSchema(shared.*)',
+                notify: true,
+                type: Object
+            }
+        },
+
+        /*********************************************************************/
+
+        // COMPUTER
+        _computeProperty: function (value) {
+            return value;
+        },
+
+        // COMPUTER
+        _computeSchema: function () {
+            return (this.shared && this.shared.schema) || null;
+        }
+    };
+
+    Polymer.XPCommonBehavior = [
+        Polymer.XPArrayBehavior,
+        Polymer.XPCommandsBehavior,
+        Polymer.XPI18nBehavior,
+        Polymer.XPObjectBehavior,
+        Polymer.XPRefirerBehavior,
+        Polymer.XPSharedBehavior,
+        Polymer.XPCommonBehaviorImp
+    ];
+</script>

@@ -1,0 +1,433 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A custom element used to get interact with the browser window.
+
+@element xp-window
+@description A custom element used to get interact with the browser window
+@keywords expandjs, web app, custom elements, web-components
+@group functionality
+@hot
+
+@homepage http://expandjs.com/elements/xp-window
+@repository https://github.com/ExpandJS/xp-window
+
+@behavior xp-array-behavior /bower_components/xp-array-behavior/xp-array-behavior.html
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-array-behavior ExpandJS/xp-array-behavior#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../xp-array-behavior/xp-array-behavior.html">
+
+<script>
+    Polymer({
+
+        // ELEMENT
+        is: 'xp-window',
+
+        // BEHAVIORS
+        behaviors: [
+            Polymer.XPArrayBehavior
+        ],
+
+        /*********************************************************************/
+
+        /**
+         * Fired when the window's hash changes.
+         *
+         * @event xp-window-hashchange
+         * @param {Element} firer
+         * @bubbles
+         */
+
+        /**
+         * Fired when the browser has lost access to the network.
+         *
+         * @event xp-window-offline
+         * @param {Element} firer
+         * @bubbles
+         */
+
+        /**
+         * Fired when the browser has gained access to the network.
+         *
+         * @event xp-window-online
+         * @param {Element} firer
+         * @bubbles
+         */
+
+        /**
+         * Fired when a user navigates away from a webpage.
+         *
+         * @event xp-window-pagehide
+         * @param {Element} firer
+         * @bubbles
+         */
+
+        /**
+         * Fired when a user navigates towards a webpage.
+         *
+         * @event xp-window-pageshow
+         * @param {Element} firer
+         * @bubbles
+         */
+
+        /**
+         * Fired when the active history entry changes.
+         *
+         * @event xp-window-popstate
+         * @param {Element} firer
+         * @bubbles
+         */
+
+        /**
+         * Fired when the web window is unloading its content and resources.
+         *
+         * @event xp-window-unload
+         * @param {Element} firer
+         * @bubbles
+         */
+
+        /*********************************************************************/
+
+        /**
+         * Wraps `history.back`.
+         *
+         * @method back
+         * @returns {Element}
+         */
+        back: function () {
+            return history.back() || this;
+        },
+
+        /**
+         * Wraps `history.forward`.
+         *
+         * @method forward
+         * @returns {Element}
+         */
+        forward: function () {
+            return history.forward() || this;
+        },
+
+        /**
+         * Wraps `history.go`.
+         *
+         * @method go
+         * @param {number} delta
+         * @returns {Element}
+         */
+        go: function (delta) {
+            XP.assertArgument(XP.isInt(delta), 1, 'number');
+            return history.go(delta) || this;
+        },
+
+        /**
+         * Wraps `history.pushState`.
+         *
+         * @method pushState
+         * @param {Object} [data]
+         * @param {string} [title = document.title]
+         * @param {string} [href = location.href]
+         * @returns {Element}
+         */
+        pushState: function (data, title, href) {
+
+            // Preparing
+            if (XP.isString(data)) { href = title; title = data; data = null; }
+
+            // Asserting
+            XP.assertArgument(XP.isVoid(data) || XP.isObject(data), 1, 'Object');
+            XP.assertArgument(XP.isVoid(data) || XP.isString(title), 2, 'string');
+            XP.assertArgument(XP.isVoid(href) || XP.isString(href), 3, 'string');
+
+            // Vars
+            var self     = this,
+                oldHref  = location.href,
+                oldTitle = document.title;
+
+            // Preparing
+            href  = href || oldHref;
+            title = title || oldTitle;
+
+            // Pushing
+            history[href !== oldHref ? 'pushState' : 'replaceState'](XP.assign({}, data, {title: title}), title, href);
+
+            // Setting
+            if (title !== oldTitle) { document.title = title; }
+
+            // Firing
+            if (href !== oldHref) { XP.delay(self.fire.bind(self, 'xp-window-popstate', {firer: self})); }
+
+            // Refreshing
+            XP.invoke(self.instances, 'update');
+
+            return self;
+        },
+
+        /**
+         * Wraps `history.replaceState`.
+         *
+         * @method replaceState
+         * @param {Object} [data]
+         * @param {string} [title = document.title]
+         * @returns {Element}
+         */
+        replaceState: function (data, title) {
+            return this.pushState(data, title);
+        },
+
+        /**
+         * Updates the element.
+         *
+         * @method update
+         * @returns {Element}
+         */
+        update: function () {
+
+            // Vars
+            var self = this;
+
+            // Setting
+            self.hash = location.hash;
+            self._setHost(location.host);
+            self._setHostname(location.hostname);
+            self._setHref(location.href);
+            self._setOrigin(location.origin);
+            self._setPathname(location.pathname);
+            self._setProtocol(location.protocol);
+            self._setSearch(location.search);
+            self._setState(history.state);
+
+            return self;
+        },
+
+        /*********************************************************************/
+
+        // PROPERTIES
+        properties: {
+
+            /**
+             * This attribute is bound to `location.hash`.
+             *
+             * @attribute hash
+             * @type string
+             * @default location.hash
+             * @notifies
+             */
+            hash: {
+                notify: true,
+                observer: '_hashChanged',
+                type: String,
+                value: location.hash
+            },
+
+            /**
+             * This attribute is bound to `location.host`.
+             *
+             * @attribute host
+             * @type string
+             * @default location.host
+             * @notifies
+             * @readonly
+             */
+            host: {
+                notify: true,
+                readOnly: true,
+                type: String,
+                value: location.host
+            },
+
+            /**
+             * This attribute is bound to `location.hostname`.
+             *
+             * @attribute hostname
+             * @type string
+             * @default location.hostname
+             * @notifies
+             * @readonly
+             */
+            hostname: {
+                notify: true,
+                readOnly: true,
+                type: String,
+                value: location.hostname
+            },
+
+            /**
+             * This attribute is bound to `location.href`.
+             *
+             * @attribute href
+             * @type string
+             * @default location.href
+             * @notifies
+             * @readonly
+             */
+            href: {
+                notify: true,
+                readOnly: true,
+                type: String,
+                value: location.href
+            },
+
+            /**
+             * This attribute is bound to `location.origin`.
+             *
+             * @attribute origin
+             * @type string
+             * @default location.origin
+             * @notifies
+             * @readonly
+             */
+            origin: {
+                notify: true,
+                readOnly: true,
+                type: String,
+                value: location.origin
+            },
+
+            /**
+             * This attribute is bound to `location.pathname`.
+             *
+             * @attribute pathname
+             * @type string
+             * @default location.pathname
+             * @notifies
+             * @readonly
+             */
+            pathname: {
+                notify: true,
+                readOnly: true,
+                type: String,
+                value: location.pathname
+            },
+
+            /**
+             * This attribute is bound to `location.protocol`.
+             *
+             * @attribute protocol
+             * @type string
+             * @default location.protocol
+             * @notifies
+             * @readonly
+             */
+            protocol: {
+                notify: true,
+                readOnly: true,
+                type: String,
+                value: location.protocol
+            },
+
+            /**
+             * This attribute is bound to `location.search`.
+             *
+             * @attribute search
+             * @type string
+             * @default location.search
+             * @notifies
+             * @readonly
+             */
+            search: {
+                notify: true,
+                readOnly: true,
+                type: String,
+                value: location.search
+            },
+
+            /**
+             * This attribute is bound to `history.state`.
+             *
+             * @attribute state
+             * @type Object
+             * @default history.state
+             * @notifies
+             * @readonly
+             */
+            state: {
+                notify: true,
+                readOnly: true,
+                type: Object,
+                value: history.state
+            }
+        },
+
+        /**
+         * The list of events.
+         *
+         * @attribute events
+         * @type Array
+         * @default ["hashchange", "offline", "online", "pagehide", "pageshow", "popstate", "unload"]
+         * @readonly
+         */
+        events: ['hashchange', 'offline', 'online', 'pagehide', 'pageshow', 'popstate', 'unload'],
+
+        /**
+         * The list of instances.
+         *
+         * @property instances
+         * @type Array
+         * @default []
+         * @readonly
+         */
+        instances: [],
+
+        /*********************************************************************/
+
+        // OBSERVER
+        _hashChanged: function () {
+
+            // Setting
+            if (this.hash !== location.hash) { location.hash = this.hash; }
+        },
+
+        /*********************************************************************/
+
+        // LISTENER
+        ready: function () {
+
+            // Vars
+            var self = this;
+
+            // Appending
+            self.append('instances', self);
+
+            // Listening
+            self.events.forEach(function (event) { self.listen(window, event, '_handleEvent'); });
+
+            // Replacing
+            if (!history.state) { self.replaceState({}, document.title); }
+
+            // Setting
+            self._setState(history.state);
+        },
+
+        /*********************************************************************/
+
+        // HANDLER
+        _handleEvent: function (event) {
+
+            // Vars
+            var self  = this,
+                title = (event.state && event.state.title) || document.title;
+
+            // Setting
+            if (event.type === 'popstate' && title !== document.title) { document.title = title; }
+
+            // Updating
+            if (event.type === 'hashchange' || event.type === 'popstate') { self.update(); }
+
+            // Firing
+            self.fire('xp-window-' + event.type, {firer: self});
+        }
+    });
+</script>

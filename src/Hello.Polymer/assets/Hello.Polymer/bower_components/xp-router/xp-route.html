@@ -1,0 +1,96 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A custom element used to declare a client side route.
+
+It must be used in conjunction with
+[xp-router](http://expandjs.com/elements/xp-router).
+
+@element xp-route
+@description A custom element used to declare a client side route
+@keywords expandjs, web app, custom elements, web-components
+@group navigation
+@hot
+
+@homepage http://expandjs.com/elements/xp-route
+@repository https://github.com/ExpandJS/xp-route
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+
+<script>
+    Polymer({
+
+        // ELEMENT
+        is: 'xp-route',
+
+        /*********************************************************************/
+
+        // PROPERTIES
+        properties: {
+
+            /**
+             * If set to true, the route is currently active.
+             *
+             * @attribute active
+             * @type boolean
+             * @default false
+             * @notifies
+             */
+            active: {
+                notify: true,
+                reflectToAttribute: true,
+                type: Boolean,
+                value: false
+            },
+
+            /**
+             * The route's data.
+             *
+             * @attribute data
+             * @type *
+             */
+            data: {},
+
+            /**
+             * The path that must be matched against the URL hash to activate the route.
+             *
+             * @attribute path
+             * @type string
+             */
+            path: {
+                reflectToAttribute: true,
+                type: String
+            },
+
+            /**
+             * The path to be redirected at when the route becomes active.
+             *
+             * @attribute redirect
+             * @type string
+             */
+            redirect: {
+                type: String
+            }
+        },
+
+        /*********************************************************************/
+
+        // LISTENER
+        created: function () {
+
+            // Classifying
+            this.classList.add('route');
+        }
+    });
+</script>

@@ -1,0 +1,229 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A custom element used to display a design grid on your application.
+
+@element xp-grid
+@description A custom element used to display a design grid on your application
+@keywords expandjs, web app, custom elements, web-components
+@group development
+@hot
+
+@homepage http://expandjs.com/elements/xp-grid
+@repository https://github.com/ExpandJS/xp-grid
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+
+<dom-module id="xp-grid">
+
+    <template strip-whitespace>
+
+        <style>
+            :host {
+                bottom: 0;
+                display: block;
+                left: 0;
+                opacity: 0.25;
+                pointer-events: none !important;
+                position: fixed;
+                right: 0;
+                top: 0;
+                transition: opacity 0.2s, visibility 0.2s;
+            }
+
+            :host([showed]) {
+                z-index: 9999;
+            }
+
+            :host(:not([showed])) {
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
+
+            :host .wrapper {
+                box-sizing: border-box;
+                height: 100%;
+                margin: auto;
+            }
+
+            :host([type="fixed-12"]) .wrapper,
+            :host([type="fixed-16"]) .wrapper {
+                width: 960px;
+            }
+
+            :host([type="material"]) .wrapper {
+                background: url('grid.png') repeat;
+            }
+
+            :host:not([type="material"]) .wrapper {
+                background: hsla(0, 100%, 50%, 0.75);
+            }
+
+            :host .wrapper * {
+                background: hsla(0, 100%, 100%, 0.75);
+                box-sizing: border-box;
+                height: 100%;
+                float: left;
+            }
+
+            :host([type="bootstrap-12"]) .wrapper * {
+                margin: 0 15px;
+                width: calc(8.333% - 30px);
+            }
+
+            :host([type="fixed-12"]) .wrapper * {
+                margin: 0 10px;
+                width: 60px;
+            }
+
+            :host([type="fixed-16"]) .wrapper * {
+                margin: 0 10px;
+                width: 40px;
+            }
+
+            :host([type="fluid-12"]) .wrapper * {
+                margin: 0 0.83%;
+                width: calc(8.333333333% - 1.66%);
+            }
+
+            :host([type="fluid-16"]) .wrapper * {
+                margin: 0 0.625%;
+                width: calc(6.25% - 1.250%);
+            }
+        </style>
+
+        <div class="wrapper"></div>
+
+    </template>
+
+    <script>
+        Polymer({
+
+            // ELEMENT
+            is: 'xp-grid',
+
+            /*********************************************************************/
+
+            // OBSERVERS
+            observers: [
+                '_gridChanged(type, wrapper)'
+            ],
+
+            // PROPERTIES
+            properties: {
+
+                /**
+                 * The number of grid's columns.
+                 *
+                 * @attribute columns
+                 * @type number
+                 * @default 0
+                 * @notifies
+                 * @readonly
+                 */
+                columns: {
+                    computed: '_computeColumns(type)',
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Number,
+                    value: 0
+                },
+
+                /**
+                 * If set to true, the grid is visible.
+                 *
+                 * @attribute showed
+                 * @type boolean
+                 * @default false
+                 * @notifies
+                 */
+                showed: {
+                    notify: true,
+                    reflectToAttribute: true,
+                    type: Boolean,
+                    value: false
+                },
+
+                /**
+                 * The grid's type.
+                 *
+                 * `"bootstrap-12"` creates a bootstrap like grid with 12 columns;
+                 *
+                 * `"fixed-12"` creates a 960px grid with 12 columns;
+                 *
+                 * `"fixed-16"` creates a 960px grid with 16 columns;
+                 *
+                 * `"fluid-12"` creates a full screen grid with 12 columns;
+                 *
+                 * `"fluid-16"` creates a full screen grid with 16 columns;
+                 *
+                 * `"material"` creates a full screen grid with divided in 4 and 8px squares;
+                 *
+                 * @attribute type
+                 * @type "bootstrap-12" | "fixed-12" | "fixed-16" | "fluid-12" | "fluid-16" | "material"
+                 * @default "material"
+                 */
+                type: {
+                    reflectToAttribute: true,
+                    type: String,
+                    value: 'material'
+                },
+
+                /**
+                 * The grid's wrapper.
+                 *
+                 * @attribute wrapper
+                 * @type Element
+                 * @notifies
+                 * @readonly
+                 */
+                wrapper: {
+                    notify: true,
+                    readOnly: true
+                }
+            },
+
+            /*********************************************************************/
+
+            // COMPUTER
+            _computeColumns: function (type) {
+                return (type && XP.toNumber(type.slice(-2))) || 0;
+            },
+
+            /*********************************************************************/
+
+            // OBSERVER
+            _gridChanged: function() {
+
+                // Vars
+                var self    = this,
+                    wrapper = XP.flush(Polymer.dom(self.wrapper)),
+                    columns = self.columns;
+
+                // Appending
+                while (columns) { columns -= wrapper.appendChild(document.createElement('div')) && 1; }
+            },
+
+            /*********************************************************************/
+
+            // LISTENER
+            ready: function () {
+
+                // Setting
+                this._setWrapper(Polymer.dom(this.root).querySelector('.wrapper'));
+            }
+        });
+    </script>
+
+</dom-module>

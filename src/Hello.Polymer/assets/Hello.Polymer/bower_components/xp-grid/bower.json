@@ -1,0 +1,26 @@
+{
+  "name": "xp-grid",
+  "license": "BSD-3-Clause",
+  "version": "0.10.0",
+  "main": "xp-grid.html",
+  "description": "A custom element used to display a design grid on your application",
+  "homepage": "http://expandjs.com/elements/xp-grid",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "expandjs",
+    "web app",
+    "custom elements",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs#0.10.0",
+    "polymer": "Polymer/polymer#^1.2.0"
+  }
+}

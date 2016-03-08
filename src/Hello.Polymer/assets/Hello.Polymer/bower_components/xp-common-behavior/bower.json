@@ -1,0 +1,32 @@
+{
+  "name": "xp-common-behavior",
+  "license": "BSD-3-Clause",
+  "version": "0.10.0",
+  "main": "xp-common-behavior.html",
+  "description": "A behavior used to merge common application behaviors",
+  "homepage": "http://expandjs.com/elements/xp-common-behavior",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "expandjs",
+    "web app",
+    "custom elements",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs#0.10.0",
+    "xp-array-behavior": "ExpandJS/xp-array-behavior#0.10.0",
+    "xp-commands-behavior": "ExpandJS/xp-commands-behavior#0.10.0",
+    "xp-i18n-behavior": "ExpandJS/xp-i18n-behavior#0.10.0",
+    "xp-object-behavior": "ExpandJS/xp-object-behavior#0.10.0",
+    "xp-refirer-behavior": "ExpandJS/xp-refirer-behavior#0.10.0",
+    "xp-shared-behavior": "ExpandJS/xp-shared-behavior#0.10.0",
+    "polymer": "Polymer/polymer#^1.2.0"
+  }
+}

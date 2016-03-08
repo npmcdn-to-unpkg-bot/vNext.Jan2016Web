@@ -1,0 +1,37 @@
+{
+  "name": "xp-schema",
+  "license": "BSD-3-Clause",
+  "version": "0.10.0",
+  "main": "xp-schema.html",
+  "description": "A class used to provide scheming functionality",
+  "homepage": "http://expandjs.com/classes/xp-schema",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "nodejs",
+    "web app",
+    "javascript",
+    "expandjs",
+    "custom elements",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs#0.10.0",
+    "xp-emitter": "ExpandJS/xp-emitter#0.10.0"
+  },
+  "_release": "0.10.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.10.0",
+    "commit": "9dfbd249a46f4d23a2ad5b2a6eca5b83c6efa80e"
+  },
+  "_source": "git://github.com/ExpandJS/xp-schema.git",
+  "_target": "0.10.0",
+  "_originalSource": "ExpandJS/xp-schema"
+}

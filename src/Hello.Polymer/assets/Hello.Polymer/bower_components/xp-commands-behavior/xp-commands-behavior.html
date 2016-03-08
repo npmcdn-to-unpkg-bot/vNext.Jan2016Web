@@ -1,0 +1,223 @@
+<!--
+@license
+Copyright (c) 2015 The ExpandJS authors. All rights reserved.
+This code may only be used under the BSD style license found at https://expandjs.github.io/LICENSE.txt
+The complete set of authors may be found at https://expandjs.github.io/AUTHORS.txt
+The complete set of contributors may be found at https://expandjs.github.io/CONTRIBUTORS.txt
+-->
+
+<!--
+A behavior used to manage the application's commands.
+
+@behavior xp-commands-behavior
+@description A behavior used to manage the application's commands
+@keywords expandjs, web app, custom elements, web-components
+@group behaviors
+@hot
+
+@homepage http://expandjs.com/elements/xp-commands-behavior
+@repository https://github.com/ExpandJS/xp-commands-behavior
+
+@behavior xp-array-behavior /bower_components/xp-array-behavior/xp-array-behavior.html
+@behavior xp-refirer-behavior /bower_components/xp-refirer-behavior/xp-refirer-behavior.html
+
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-array-behavior ExpandJS/xp-array-behavior#0.10.0
+@dependency xp-refirer-behavior ExpandJS/xp-refirer-behavior#0.10.0
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../xp-array-behavior/xp-array-behavior.html">
+<link rel="import" href="../xp-refirer-behavior/xp-refirer-behavior.html">
+
+<script>
+    (function () {
+
+        // Vars
+        var commands = {};
+
+        // Prototype
+        Polymer.XPCommandsBehaviorImp = {
+
+            /**
+             * Adds a widget or application command.
+             *
+             * The `name` should be expressed in the form "namespace:action".
+             *
+             * @method addCommand
+             * @param {string} name
+             * @param {Object} [options]
+             *   @param {string} [options.filter]
+             *   @param {string} [options.selector]
+             * @returns {Element}
+             */
+            addCommand: function (name, options) {
+
+                // Asserting
+                XP.assertArgument(XP.isString(name, true), 1, 'string');
+                XP.assertArgument(XP.isVoid(options) || XP.isObject(options), 2, 'Object');
+                XP.assertOption(!options || XP.isVoid(options.filter) || XP.isString(options.filter, true), 'options.filter', 'string');
+                XP.assertOption(!options || XP.isVoid(options.selector) || XP.isString(options.selector, true), 'options.selector', 'string');
+
+                // Vars
+                var self = this;
+
+                // Preparing
+                options = options || {};
+
+                // Setting
+                self.set('commands.' + name, {
+                    filter: options.filter || '',
+                    selector: options.selector || '',
+                    targets: options.selector ? XP.filterElements(self.commanders, options.selector) : [self]
+                });
+
+                // Notifying
+                self.notifyOthers('commanders', 'commands.' + name, self.commands[name]);
+
+                return self;
+            },
+
+            /**
+             * Adds a map of commands.
+             *
+             * @method addCommands
+             * @param {Array | Object} commands
+             * @returns {Element}
+             */
+            addCommands: function (commands) {
+
+                // Asserting
+                XP.assertArgument(XP.isCollection(commands), 1, 'Array or Object');
+
+                // Vars
+                var self        = this,
+                    arrIterator = function (commands) { XP.forEach(commands, function (name) { self.addCommand(name); }); return self; },
+                    objIterator = function (commands) { XP.forOwn(commands, function (options, name) { self.addCommand(name, options); }); return self; };
+
+                // Adding
+                return (XP.isArrayable(commands) ? arrIterator : objIterator)(commands);
+            },
+
+            /**
+             * Executes a widget or application command.
+             *
+             * @param {string} name
+             * @param {Array} [args]
+             * @returns {Element}
+             */
+            doCommand: function (name, args) {
+
+                // Asserting
+                XP.assertArgument(XP.isString(name, true), 1, 'string');
+                XP.assertArgument(XP.isVoid(args) || XP.isArray(args), 2, 'Array');
+
+                // Vars
+                var self    = this,
+                    command = self.commands[name],
+                    parts   = command && XP.split(name, ':'),
+                    method  = command && XP.camelCase('do-' + parts[parts.length - 1]),
+                    targets = command && command.targets;
+
+                // Invoking
+                XP.forEach(targets || [], function (target) {
+
+                    // Checking
+                    if (!target.isAttached || (command.filter && !XP.matches(target, command.filter))) { return; }
+
+                    // Applying
+                    target[method].apply(target, args);
+                });
+
+                return self;
+            },
+
+            /*********************************************************************/
+
+            // PROPERTIES
+            properties: {
+
+                /**
+                 * The map of commands.
+                 *
+                 * @attribute commands
+                 * @type Object
+                 * @notifies
+                 * @readonly
+                 */
+                commands: {
+                    notify: true,
+                    readOnly: true,
+                    value: commands
+                }
+            },
+
+            /**
+             * The list of commanders.
+             *
+             * @property commanders
+             * @type Array
+             * @default []
+             * @readonly
+             */
+            commanders: [],
+
+            /*********************************************************************/
+
+            // LISTENER
+            attached: function () {
+
+                // Vars
+                var self = this;
+
+                // Iterating
+                XP.forOwn(self.commands, function (command, name) {
+
+                    // Vars
+                    var path = 'commands.' + name + '.targets';
+
+                    // Pushing
+                    if (command.selector && XP.matches(self, command.selector)) { self.append(path, self); } else { return; }
+
+                    // Notifying
+                    self.notifyOthers('commanders', path + '.length', self.get(path + '.length'));
+                });
+            },
+
+            // LISTENER
+            detached: function () {
+
+                // Vars
+                var self = this;
+
+                // Iterating
+                XP.forOwn(self.commands, function (command, name) {
+
+                    // Vars
+                    var path = 'commands.' + name + '.targets';
+
+                    // Pushing
+                    if (command.selector && XP.matches(self, command.selector)) { self.pull(path, self); } else { return; }
+
+                    // Notifying
+                    self.notifyOthers('commanders', path + '.length', self.get(path + '.length'));
+                });
+            },
+
+            // LISTENER
+            ready: function () {
+
+                // Appending
+                this.append('commanders', this);
+            }
+        };
+
+        Polymer.XPCommandsBehavior = [
+            Polymer.XPArrayBehavior,
+            Polymer.XPRefirerBehavior,
+            Polymer.XPCommandsBehaviorImp
+        ]
+    }());
+</script>

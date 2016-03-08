@@ -1,0 +1,38 @@
+{
+  "name": "xp-router",
+  "license": "BSD-3-Clause",
+  "description": "This class is used to do client/server side routing.",
+  "version": "0.10.0",
+  "homepage": "https://github.com/ExpandJS/xp-router",
+  "author": "ExpandJS <dev@expandjs.com> (http://expandjs.com)",
+  "contributors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ExpandJS/xp-router.git"
+  },
+  "dependencies": {
+    "director": "^1.2.0",
+    "expandjs": "0.10.0",
+    "path-to-regexp": "^1.2.0"
+  },
+  "devDependencies": {
+    "browserify": "*",
+    "derequire": "*",
+    "minifyify": "*"
+  },
+  "scripts": {
+    "build": "npm run build:browserify && npm run build:minify && node noconflict",
+    "build:browserify": "browserify index -i director -i expandjs --standalone XPRouter | derequire > dist/xp-router.js",
+    "build:minify": "browserify -d index -i director -i expandjs --standalone XPRouter -p [minifyify --map xp-router.min.map --output dist/xp-router.min.map] | derequire > dist/xp-router.min.js"
+  },
+  "keywords": [
+      "expandjs",
+      "web app",
+      "router",
+      "routing"
+  ]
+}
