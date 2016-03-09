@@ -1,5 +1,8 @@
 ﻿ 
+<swagger-api-client spec="http://localhost:14016/swagger/v1/swagger.json"></swagger-api-client>
+
 <template is="dom-bind" id="app">
+
     <paper-drawer-panel id="paperDrawerPanel">
         <!-- Drawer Scroll Header Panel -->
         <paper-scroll-header-panel drawer fixed>
@@ -135,6 +138,11 @@
                         <paper-material elevation="1">
                             <h2 class="page-title">Contact</h2>
                             <p>This is the contact section</p>
+
+                            <h4>Output:</h4>
+                            <paper-material style="padding: 10px; margin: 10px; background-color: whitesmoke">
+                                <pre id="mydata"></pre>
+                            </paper-material>
                         </paper-material>
                     </section>
                 </iron-pages>
@@ -149,7 +157,7 @@
 
 
 
-    
+
 </template>
 
 
@@ -169,8 +177,21 @@
 
 @section Scripts {
 <!-- build:js scripts/app.js -->
-<script src="/assets/Hello.Polymer/Hello.Polymer/scripts/app.js"></script>
-<!-- endbuild-->
+    <script src="/assets/Hello.Polymer/Hello.Polymer/scripts/app.js"></script>
+
+     <script>
+    var api = document.querySelector('swagger-api-client');
+    api.addEventListener('swagger-client-ready', function () {
+
+        // upon connect, fetch pets and set contents to element "mydata"
+        api.client.apis.CrudActions.ProductsByIdGet({ id: 1 }, { responseContentType: 'application/json' }, function (data) {
+            document.getElementById("mydata").innerHTML = JSON.stringify(data.obj, null, 2);
+        });
+
+    });
+</script>
+
+    <!-- endbuild-->
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
 

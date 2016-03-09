@@ -21,6 +21,7 @@
     "expandjs": "ExpandJS/expandjs#^0.10.0",
     "mat-elements": "ExpandJS/mat-elements#^0.10.0",
     "xp-elements": "ExpandJS/xp-elements#^0.10.0",
-    "google-map": "^1.1.10"
+    "google-map": "^1.1.10",
+    "swagger-api-client": "^1.0.4"
   }
 }
