@@ -120,17 +120,27 @@ namespace WebApplication1
                 c.DescribeAllEnumsAsStrings();
 
                 c.OperationFilter<AssignOperationVendorExtensions>();
+             
             });
 
             if (_hostingEnvironment.IsDevelopment())
             {
                 services.ConfigureSwaggerGen(c =>
                 {
-                    c.IncludeXmlComments(string.Format(@"{0}\artifacts\bin\WebApplication1\{1}\{2}{3}\WebApplication1.xml",
+                    var xmlPath = string.Format(@"{0}\artifacts\bin\WebApplication1\{1}\{2}{3}\WebApplication1.xml",
                         GetSolutionBasePath(),
                         _appEnvironment.Configuration,
                         _appEnvironment.RuntimeFramework.Identifier,
-                        _appEnvironment.RuntimeFramework.Version.ToString().Replace(".", string.Empty)));
+                        _appEnvironment.RuntimeFramework.Version.ToString().Replace(".", string.Empty));
+                   
+                    c.IncludeXmlComments(xmlPath);
+
+                    var xmlPath2 = string.Format(@"{0}\artifacts\bin\p6.api.animals.v1\{1}\dotnet5.4\p6.api.animals.v1.xml",
+                       GetSolutionBasePath(),
+                       _appEnvironment.Configuration);
+
+                    c.IncludeXmlComments(xmlPath2);
+
                 });
             }
 
