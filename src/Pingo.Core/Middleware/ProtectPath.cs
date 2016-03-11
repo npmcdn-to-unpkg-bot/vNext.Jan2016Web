@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
@@ -15,23 +14,51 @@ using Pingo.Core.Settings;
 
 namespace Pingo.Core.Middleware
 {
-    public class AuthorizeMiddleware
+    public class ProtectPath
     {
+        
+        private readonly string _policyName;
+
         private readonly RequestDelegate _next;
         private readonly IOptions<FiltersConfig> _settings;
-        private IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<OptOutOptInFilterProvider> _logger;
-        private static Dictionary<string, IMiddlewarePlugin> TypeToMiddlewarePlugins = new Dictionary<string, IMiddlewarePlugin>();
+        private static readonly Dictionary<string, IMiddlewarePlugin> TypeToMiddlewarePlugins = new Dictionary<string, IMiddlewarePlugin>();
 
-        public AuthorizeMiddleware(RequestDelegate next, IServiceProvider serviceProvider, IOptions<FiltersConfig> settings, ILogger<OptOutOptInFilterProvider> logger)
+        public ProtectPath(RequestDelegate next, ProtectPathOptions options, IServiceProvider serviceProvider, IOptions<FiltersConfig> settings, ILogger<OptOutOptInFilterProvider> logger)
         {
             _next = next;
+            _policyName = options.PolicyName;
             _serviceProvider = serviceProvider;
             _settings = settings;
             _logger = logger;
             FrontLoadFilterItems();
         }
 
+        public async Task Invoke(HttpContext httpContext, IAuthorizationService authorizationService)
+        {
+            var middlewarePlugins = new List<IMiddlewarePlugin>();
+
+            foreach (var record in _settings.Value.GlobalPath.OptIn)
+            {
+                foreach (var path in record.Paths)
+                {
+                    if (httpContext.Request.Path.StartsWithSegments(path))
+                    {
+                        // gotcha.
+                        var authorized = await authorizationService.AuthorizeAsync(
+                               httpContext.User, null, _policyName);
+                        if (!authorized)
+                        {
+                            await httpContext.Authentication.ChallengeAsync();
+                            return;
+                        }
+                    }
+                }
+            }
+            await _next(httpContext);
+
+        }
         private IMiddlewarePlugin CreateMiddlewareInstance(string filterType)
         {
             var type = TypeHelper<Type>.GetTypeByFullName(filterType);
@@ -94,57 +121,6 @@ namespace Pingo.Core.Middleware
                 throw;
             }
             _logger.LogInformation("Exit");
-        }
-        public async Task Invoke(HttpContext httpContext)
-        {
-            if (httpContext.Request.Method != "GET")
-            {
-                await _next(httpContext);
-                return;
-            }
-            var middlewarePlugins = new List<IMiddlewarePlugin>();
-
-            foreach (var record in _settings.Value.GlobalPath.OptIn)
-            {
-                foreach (var strRegex in record.Paths)
-                {
-                   
-                    Regex myRegex = new Regex(strRegex, RegexOptions.IgnoreCase);
-                    string strTargetString = httpContext.Request.Path;
-                    var match = myRegex.Matches(strTargetString).Cast<Match>().Any(myMatch => myMatch.Success);
-                    if (match)
-                    {
-                        middlewarePlugins.Add(TypeToMiddlewarePlugins[record.Filter]);
-                        break;
-                    }
-                }
-            }
-            bool continueToNext = true;
-        
-            foreach (var mp in middlewarePlugins)
-            {
-                continueToNext = mp.Invoke(httpContext);
-                if (!continueToNext)
-                {
-                    break;
-                }
-            }
-
-
-            if (continueToNext)
-            {
-                await _next(httpContext);
-            }
-        }
-    }
-    // You may need to install the Microsoft.AspNet.Http.Abstractions package into your project
-
-    // Extension method used to add the middleware to the HTTP request pipeline.
-    public static class MiddlewareExtensions
-    {
-        public static IApplicationBuilder UseAuthorizeMiddleware(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<AuthorizeMiddleware>();
         }
     }
 }

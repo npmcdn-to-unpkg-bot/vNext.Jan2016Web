@@ -36,4 +36,15 @@ namespace Pingo.Core.Settings
             */
         }
     }
+    public class GlobalPathRecord
+    {
+        public string Filter { get; set; }
+        public List<string> Paths { get; set; }
+
+        public override string ToString()
+        {
+            string output = JsonConvert.SerializeObject(this, Formatting.Indented);
+            return output;  
+        }
+    }
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.AspNet.Mvc.Filters;
+using Pingo.Core.Middleware;
 using Pingo.Core.Reflection;
 using Serilog;
 using Module = Autofac.Module;
@@ -23,6 +24,14 @@ namespace Pingo.Filters
             logger.Information("Found these types: {DerivedTypes}", derivedTypesName);
 
             builder.RegisterTypes(derivedTypes).SingleInstance();
+
+
+            derivedTypes = TypeHelper<MiddlewarePlugin>.FindDerivedTypes(assembly).ToArray();
+            derivedTypesName = derivedTypes.Select(x => x.GetTypeInfo().Name);
+            logger.Information("Found these types: {DerivedTypes}", derivedTypesName);
+            builder.RegisterTypes(derivedTypes).SingleInstance();
+
+
             /*
 
             builder.RegisterType<AuthActionFilter>().SingleInstance();

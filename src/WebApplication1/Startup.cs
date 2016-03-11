@@ -194,8 +194,11 @@ namespace WebApplication1
                 Path = "/Elm",
                 PolicyName = "Authenticated"
             });
+            app.UseProtectPath(new ProtectPathOptions
+            {
+                PolicyName = "Authenticated"
+            });
 
-            app.UseAuthorizeMiddleware();
             app.UseElmPage(); // Shows the logs at the specified path
             app.UseElmCapture(); // Adds the ElmLoggerProvider
 
