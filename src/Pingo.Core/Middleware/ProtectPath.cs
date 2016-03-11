@@ -32,7 +32,7 @@ namespace Pingo.Core.Middleware
             _serviceProvider = serviceProvider;
             _settings = settings;
             _logger = logger;
-            FrontLoadFilterItems();
+  //          FrontLoadFilterItems();
         }
 
         public async Task Invoke(HttpContext httpContext, IAuthorizationService authorizationService)

@@ -31,6 +31,7 @@ using Serilog;
 using Serilog.Sinks.RollingFile;
 using Swashbuckle.SwaggerGen.Generator;
 using System.Linq;
+using Microsoft.AspNet.Identity;
 
 
 namespace WebApplication1
@@ -90,6 +91,7 @@ namespace WebApplication1
             services.AddInstance<IApplicationEnvironment>(_appEnvironment);
 
             services.AddAuthentication();
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
@@ -167,6 +169,12 @@ namespace WebApplication1
             services.AddTransient<ClaimsPrincipal>(
                s => s.GetService<IHttpContextAccessor>().HttpContext.User);
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Cookies.ApplicationCookie.LoginPath = new Microsoft.AspNet.Http.PathString("/Identity/Account/Login");
+                options.Cookies.ApplicationCookie.LogoutPath = new Microsoft.AspNet.Http.PathString("/Identity/Account/LogOff");
+            });
+
             services.AddAllConfigureServicesRegistrants();
             // autofac auto registration
             services.AddDependencies();
@@ -182,18 +190,34 @@ namespace WebApplication1
         public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
+            app.UseIdentity()
+                .UseDeveloperAuthAuthentication(
+                    new DeveloperAuthOptions()
+                    {
+                        ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
+                        ConsumerSecret = "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
+                    })
+                .UseTwitter2Authentication(
+                    new Twitter2Options()
+                    {
+                        ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
+                        ConsumerSecret = "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
+                    });
 
             app.AddAllConfigureRegistrants();
-
             app.UseCookieAuthentication(options =>
             {
-                options.AutomaticAuthenticate = true;
+                options.LoginPath = new PathString("/Identity/Account/Login");
+                options.LogoutPath = new PathString("/Identity/Account/LogOff");
             });
+
+            /*
             app.UseProtectFolder(new ProtectFolderOptions
             {
                 Path = "/Elm",
                 PolicyName = "Authenticated"
             });
+            */
             app.UseProtectPath(new ProtectPathOptions
             {
                 PolicyName = "Authenticated"
@@ -258,18 +282,7 @@ namespace WebApplication1
 
             app.UseStaticFiles();
 
-            app.UseIdentity()
-                .UseDeveloperAuthAuthentication(
-                    new DeveloperAuthOptions()
-                    {
-                        ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
-                        ConsumerSecret = "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
-                    }).UseTwitter2Authentication(
-                        new Twitter2Options()
-                        {
-                            ConsumerKey = "uWkHwFNbklXgsLHYzLfRXcThw",
-                            ConsumerSecret = "2kyg9WdUiJuU2HeWYJEuvwzaJWoweLadTgG3i0oHI5FeNjD5Iv"
-                        });
+
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 
@@ -288,6 +301,7 @@ namespace WebApplication1
             app.UseSwaggerGen();
             app.UseSwaggerUi();
         }
+
         private string GetSolutionBasePath()
         {
             var dir = Directory.CreateDirectory(_appEnvironment.ApplicationBasePath);
