@@ -218,6 +218,7 @@ namespace WebApplication1
                 PolicyName = "Authenticated"
             });
             */
+            app.UseProtectLocalOnly(new ProtectLocalOnlyOptions());
             app.UseProtectPath(new ProtectPathOptions
             {
                 PolicyName = "Authenticated"
