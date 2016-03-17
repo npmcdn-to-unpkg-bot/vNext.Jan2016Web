@@ -38,7 +38,6 @@
     "Newtonsoft.Json.Schema": "2.0.2",
     "p6.animals": "1.0.0-*",
     "p6.api.animals.v1": "1.0.0-*",
-    "p6.AspNet.Identity3.Cassandra": "1.0.0-*",
     "p6.CassandraStore": "1.0.0-*",
     "P6.IdentityServer4": "1.0.0-*",
     "p6.main": "1.0.0-*",
