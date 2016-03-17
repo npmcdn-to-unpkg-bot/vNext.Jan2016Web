@@ -32,6 +32,7 @@ using Serilog.Sinks.RollingFile;
 using Swashbuckle.SwaggerGen.Generator;
 using System.Linq;
 using Microsoft.AspNet.Identity;
+using p6.CassandraStore.Settings;
 
 
 namespace WebApplication1
@@ -155,7 +156,9 @@ namespace WebApplication1
             services.AddSingleton<IConfigurationRoot, GlobalConfigurationRoot>();
 
             services.AddOptions();
-            services.Configure<FiltersConfig>(Configuration.GetSection(FiltersConfig.WellKnown_FilterSectionName));
+            services.Configure<FiltersConfig>(Configuration.GetSection(FiltersConfig.WellKnown_SectionName));
+            services.Configure<CassandraConfig>(Configuration.GetSection(CassandraConfig.WellKnown_SectionName));
+
 
             // Add application services.
 

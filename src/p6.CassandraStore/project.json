@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-*",
+  "description": "p6.CassandraStore Class Library",
+  "authors": [ "Herb" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "CassandraCSharpDriver": "3.0.3"
+      }
+    }
+
+  },
+  "dependencies": {
+  }
+}
