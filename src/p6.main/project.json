@@ -1,12 +1,13 @@
 {
-  "version": "1.0.0-*",
-  "description": "p6.main Class Library",
-  "authors": [ "Dev" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+    "version": "1.0.0-*",
+    "description": "p6.main Class Library",
+    "authors": [ "Dev" ],
+    "tags": [ "" ],
+    "projectUrl": "",
+    "licenseUrl": "",
     "frameworks": {
         "dnx451": { },
+        "net451": { },
         "dotnet5.4": {
             "dependencies": {
                 "Microsoft.CSharp": "4.0.1-beta-23516",

@@ -66,6 +66,11 @@
   },
 
     "frameworks": {
+        "dnx451": {
+            "dependencies": {
+                "CassandraCSharpDriver": "3.0.3"
+            }
+        },
         "dnxcore50": { }
     },
 

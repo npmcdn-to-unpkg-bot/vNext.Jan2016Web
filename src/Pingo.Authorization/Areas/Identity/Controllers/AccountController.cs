@@ -177,11 +177,30 @@ namespace Pingo.Authorization.Areas.Identity.Controllers
             }
             else
             {
-                // If the user does not have an account, then ask the user to create an account.
-                ViewData["ReturnUrl"] = returnUrl;
-                ViewData["LoginProvider"] = info.LoginProvider;
-                var email = info.ExternalPrincipal.FindFirstValue(ClaimTypes.Email);
-                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email });
+                var autoCreateAccount = false;
+                if (autoCreateAccount)
+                {
+                    var nameIdentifier = info.ExternalPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var name = info.ExternalPrincipal.FindFirstValue(ClaimTypes.Name);
+
+                    // NOTE: This bypasses the initial onboarding of a user and ust uses their nameIdentifier as an email
+                    var result2 = await ExternalLoginConfirmation(
+                        new ExternalLoginConfirmationViewModel
+                        {
+                            Email =
+                                string.Format("{0}@{1}", nameIdentifier, Request.HttpContext.Connection.LocalIpAddress)
+                        },
+                        returnUrl);
+                    return result2;
+                }
+                else
+                {
+                    // If the user does not have an account, then ask the user to create an account.
+                    ViewData["ReturnUrl"] = returnUrl;
+                    ViewData["LoginProvider"] = info.LoginProvider;
+                    var email = info.ExternalPrincipal.FindFirstValue(ClaimTypes.Email);
+                    return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email });
+                }
             }
         }
 
