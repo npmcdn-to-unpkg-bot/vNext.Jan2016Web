@@ -1,4 +1,5 @@
-﻿using Cassandra;
+﻿using System;
+using Cassandra;
 using p6.CassandraStore.Settings;
 
 namespace p6.CassandraStore.DAO
@@ -20,16 +21,29 @@ namespace p6.CassandraStore.DAO
 
         private Cluster Connect()
         {
-            QueryOptions queryOptions = new QueryOptions()
-                .SetConsistencyLevel(ConsistencyLevel.One);
+            try
+            {
+                QueryOptions queryOptions = new QueryOptions()
+                    .SetConsistencyLevel(ConsistencyLevel.One);
+                var builder = Cassandra.Cluster.Builder();
+                builder.AddContactPoints(CassandraConfig.ContactPoints);
 
-            Cluster cluster = Cassandra.Cluster.Builder()
-                .AddContactPoints(CassandraConfig.ContactPoints)
-                .WithCredentials(CassandraConfig.Credentials.UserName, CassandraConfig.Credentials.UserName)
-                .WithQueryOptions(queryOptions)
-                .Build();
+                if (!string.IsNullOrEmpty(CassandraConfig.Credentials.UserName) &&
+                    !string.IsNullOrEmpty(CassandraConfig.Credentials.Password))
+                {
+                    builder.WithCredentials(
+                        CassandraConfig.Credentials.UserName,
+                        CassandraConfig.Credentials.Password);
+                }
+                builder.WithQueryOptions(queryOptions);
+                Cluster cluster = builder.Build();
 
-            return cluster;
+                return cluster;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         public ISession GetSession()

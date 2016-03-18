@@ -13,7 +13,7 @@ namespace P6.AspNet.CassandraIdentity3
     where TUser : IdentityUser<string>
     where TRole : IdentityRole<string>
     {
-        public RoleStore(IIdentityDatabaseContext<TUser, TRole, string> databaseContext, 
+        public RoleStore(IIdentityCassandraContext<TUser, TRole, string> databaseContext, 
             ILookupNormalizer normalizer = null, IdentityErrorDescriber describer = null) : base(databaseContext, normalizer, describer) { }
     }
 
@@ -24,7 +24,7 @@ namespace P6.AspNet.CassandraIdentity3
         where TRole : IdentityRole<TKey>
         where TKey : IEquatable<TKey>
     {
-        public RoleStore(IIdentityDatabaseContext<TUser, TRole, TKey> databaseContext, ILookupNormalizer normalizer = null, IdentityErrorDescriber describer = null)
+        public RoleStore(IIdentityCassandraContext<TUser, TRole, TKey> databaseContext, ILookupNormalizer normalizer = null, IdentityErrorDescriber describer = null)
         {
             if (databaseContext == null) throw new ArgumentNullException(nameof(databaseContext));
 
@@ -33,7 +33,7 @@ namespace P6.AspNet.CassandraIdentity3
             ErrorDescriber = describer ?? new IdentityErrorDescriber();
         }
 
-        protected IIdentityDatabaseContext<TUser, TRole, TKey> DatabaseContext { get; set; }
+        protected IIdentityCassandraContext<TUser, TRole, TKey> DatabaseContext { get; set; }
 
         protected ILookupNormalizer Normalizer { get; set; }
         /// <summary>

@@ -13,7 +13,7 @@ namespace P6.AspNet.CassandraIdentity3
     {
         public static IdentityBuilder AddCassandraIdentityStores<TContext>(this IdentityBuilder builder,
             Action<TContext> optionsAction = null)
-            where TContext : IIdentityDatabaseContext<IdentityUser<string>, IdentityRole<string>, string>
+            where TContext : IIdentityCassandraContext<IdentityUser<string>, IdentityRole<string>, string>
         {
             builder.Services.TryAdd(GetDefaultServices(builder.UserType, builder.RoleType, typeof (TContext), null,
                 optionsAction));
@@ -22,7 +22,7 @@ namespace P6.AspNet.CassandraIdentity3
 
         public static IdentityBuilder AddCassandraIdentityStores<TContext, TUser>(this IdentityBuilder builder, 
             Action<TContext> optionsAction = null)
-            where TContext : IIdentityDatabaseContext<TUser, IdentityRole<string>, string>
+            where TContext : IIdentityCassandraContext<TUser, IdentityRole<string>, string>
             where TUser : IdentityUser<string>
         {
             builder.Services.TryAdd(GetDefaultServices(typeof(TUser), builder.RoleType, typeof(TContext), null, optionsAction));
@@ -31,7 +31,7 @@ namespace P6.AspNet.CassandraIdentity3
 
         public static IdentityBuilder AddCassandraIdentityStores<TContext, TUser, TKey>(this IdentityBuilder builder, 
             Action<TContext> optionsAction = null)
-            where TContext : IIdentityDatabaseContext<TUser, IdentityRole<TKey>, TKey>
+            where TContext : IIdentityCassandraContext<TUser, IdentityRole<TKey>, TKey>
             where TUser : IdentityUser<TKey>
             where TKey : IEquatable<TKey>
         {
@@ -41,7 +41,7 @@ namespace P6.AspNet.CassandraIdentity3
 
         public static IdentityBuilder AddCassandraIdentityStores<TContext, TUser, TRole, TKey>(this IdentityBuilder builder, 
             Action<TContext> optionsAction = null)
-            where TContext : IIdentityDatabaseContext<TUser, TRole, TKey>
+            where TContext : IIdentityCassandraContext<TUser, TRole, TKey>
             where TRole : IdentityRole<TKey>
             where TUser : IdentityUser<TKey>
             where TKey : IEquatable<TKey>
@@ -60,7 +60,7 @@ namespace P6.AspNet.CassandraIdentity3
 
             var services = new ServiceCollection();
             services.AddScoped(contextType, provider => CreateInstance(provider, optionsAction));
-            services.AddScoped(typeof(IIdentityDatabaseContext<,,>).MakeGenericType(userType, roleType, keyType), provider => CreateInstance(provider, optionsAction));
+            services.AddScoped(typeof(IIdentityCassandraContext<,,>).MakeGenericType(userType, roleType, keyType), provider => CreateInstance(provider, optionsAction));
 
             services.AddScoped(typeof(IUserStore<>).MakeGenericType(userType), userStoreType);
             services.AddScoped(typeof(IUserLoginStore<>).MakeGenericType(userType), userStoreType);

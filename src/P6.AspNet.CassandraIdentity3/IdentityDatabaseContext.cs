@@ -6,7 +6,7 @@ using p6.CassandraStore.Settings;
 
 namespace P6.AspNet.CassandraIdentity3
 {
-    public interface IIdentityDatabaseContext<TUser, TRole, TKey>
+    public interface IIdentityCassandraContext<TUser, TRole, TKey>
         where TRole : IdentityRole<TKey>
         where TUser : IdentityUser<TKey>
         where TKey : IEquatable<TKey>
@@ -14,20 +14,20 @@ namespace P6.AspNet.CassandraIdentity3
         ICassandraDAO CassandraDAO { get; }
     }
 
-    public class IdentityDatabaseContext : IdentityDatabaseContext<IdentityUser, IdentityRole, string>
+    public class IdentityCassandraContext : IdentityCassandraContext<IdentityUser, IdentityRole, string>
     {
-        public IdentityDatabaseContext(CassandraConfig cassandraConfig) : base(cassandraConfig)
+        public IdentityCassandraContext(CassandraConfig cassandraConfig) : base(cassandraConfig)
         {
         }
     }
 
-    public class IdentityDatabaseContext<TUser, TRole, TKey> : IIdentityDatabaseContext<TUser, TRole, TKey>
+    public class IdentityCassandraContext<TUser, TRole, TKey> : IIdentityCassandraContext<TUser, TRole, TKey>
         where TRole : IdentityRole<TKey>
         where TUser : IdentityUser<TKey>
         where TKey : IEquatable<TKey>
     {
         private CassandraConfig _cassandraConfig { get; set; }
-        public IdentityDatabaseContext (CassandraConfig cassandraConfig)
+        public IdentityCassandraContext(CassandraConfig cassandraConfig)
         {
             _cassandraConfig = cassandraConfig;
         }

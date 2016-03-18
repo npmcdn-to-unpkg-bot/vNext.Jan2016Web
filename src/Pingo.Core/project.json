@@ -23,16 +23,16 @@
             }
         }
     },
-  "dependencies": {
-    "Autofac": "4.0.0-rc1-177",
-    "Autofac.Configuration": "4.0.0-rc1-268",
-    "Autofac.Extensions.DependencyInjection": "4.0.0-rc1-177",
-    "EntityFramework.MicrosoftSqlServer": "7.0.0-rc1-final",
-    "Microsoft.AspNet.Antiforgery": "1.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
-    "Microsoft.Extensions.Caching.Abstractions": "1.0.0-rc1-final",
-    "Microsoft.Extensions.Caching.Memory": "1.0.0-rc1-final",
-    "Newtonsoft.Json": "8.0.3",
-    "Serilog": "2.0.0-beta-519"
-  }
+    "dependencies": {
+        "Autofac": "4.0.0-rc1-177",
+        "Autofac.Configuration": "4.0.0-rc1-268",
+        "Autofac.Extensions.DependencyInjection": "4.0.0-rc1-177",
+        "EntityFramework.MicrosoftSqlServer": "7.0.0-rc1-final",
+        "Microsoft.AspNet.Antiforgery": "1.0.0-rc1-final",
+        "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+        "Microsoft.Extensions.Caching.Abstractions": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Caching.Memory": "1.0.0-rc1-final",
+        "Newtonsoft.Json": "8.0.3",
+        "Serilog": "2.0.0-beta-521"
+    }
 }
