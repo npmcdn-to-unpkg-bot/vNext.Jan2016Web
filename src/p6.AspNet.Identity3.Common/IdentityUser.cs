@@ -6,29 +6,38 @@ using Microsoft.AspNet.Identity;
 
 namespace p6.AspNet.Identity3.Common
 {
-	public class IdentityUser : IdentityUser<string>
+	public class IdentityUser : IdentityUser<Guid>
 	{
-		public IdentityUser() : base()
+	    private string _originalUserName;
+
+	    public IdentityUser() : base()
 		{
-			Id = Guid.NewGuid().ToString();
+			Id = Guid.NewGuid();
 		}
 
-		public IdentityUser(string userName) : this()
-		{
-			UserName = userName;
-		}
-	}
+        /// <summary>
+        /// Indicates whether the username for the user has changed from the original username used when the CassandraUser was
+        /// created/loaded from C*.  Returns the original username in an out parameter if true.
+        /// </summary>
+        public bool HasUserNameChanged(out string originalUserName)
+        {
+            originalUserName = _originalUserName;
+            return UserName != _originalUserName;
+        }
+    }
 
 	public class IdentityUser<TKey> : IdentityUser<IdentityRole<TKey>, TKey>
 		where TKey : IEquatable<TKey>
 	{
-		public IdentityUser() : base()
+        private string _originalUserName;
+        public IdentityUser() : base()
 		{
-		}
+        }
 
 		public IdentityUser(string userName) : base(userName)
 		{
-		}
+            _originalUserName = UserName;
+        }
 	}
 
     public class IdentityUser<TRole, TKey>

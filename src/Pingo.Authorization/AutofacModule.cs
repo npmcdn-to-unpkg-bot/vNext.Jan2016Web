@@ -1,4 +1,8 @@
-﻿using System.Reflection;
+﻿#define ENTITY_IDENTITY
+#undef ENTITY_IDENTITY
+
+using System;
+using System.Reflection;
 using Autofac;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +12,12 @@ using Pingo.Core.IoC;
 using Pingo.Core.Startup;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Infrastructure;
+using P6.AspNet.CassandraIdentity3;
+using Pingo.Authorization.Models;
 
 namespace Pingo.Authorization
 {
+#if ENTITY_IDENTITY
     public class MyConfigureEntityFrameworkRegistrant : ConfigureEntityFrameworkRegistrant
     {
         public override void OnAddDbContext(EntityFrameworkServicesBuilder builder)
@@ -25,7 +32,7 @@ namespace Pingo.Authorization
                                     */
         }
     }
-
+#endif
     public class MyConfigureServicesRegistrant : ConfigureServicesRegistrant
     {
         public override void OnConfigureServices(IServiceCollection services)
@@ -34,14 +41,20 @@ namespace Pingo.Authorization
             //builder.AddSqlServer();
             builder.AddInMemoryDatabase();
             builder.AddAllConfigureEntityFrameworkRegistrants();
-/*
-                .AddDbContext<Pingo.Authorization.Models.ApplicationDbContext>(options =>
-                    options.UseSqlServer(
-                        GlobalConfigurationRoot.Configuration["Data:DefaultConnection:ConnectionString"]));
-*/
+            /*
+                            .AddDbContext<Pingo.Authorization.Models.ApplicationDbContext>(options =>
+                                options.UseSqlServer(
+                                    GlobalConfigurationRoot.Configuration["Data:DefaultConnection:ConnectionString"]));
+            */
+#if ENTITY_IDENTITY
             services.AddIdentity<Models.ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<Models.ApplicationDbContext>()
+                            .AddEntityFrameworkStores<Models.ApplicationDbContext>()
+                            .AddDefaultTokenProviders();
+#else
+            services.AddIdentity<ApplicationUser, CassandraIdentityRole>()
+                .AddCassandraIdentityStores<ApplicationDbContext, Models.ApplicationUser, CassandraIdentityRole, Guid>()
                 .AddDefaultTokenProviders();
+#endif
         }
     }
 

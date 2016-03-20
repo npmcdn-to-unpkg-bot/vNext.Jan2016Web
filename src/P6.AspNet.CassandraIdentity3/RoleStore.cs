@@ -43,7 +43,7 @@ namespace P6.AspNet.CassandraIdentity3
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+             
         }
 
         public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)

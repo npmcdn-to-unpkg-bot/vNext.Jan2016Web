@@ -14,7 +14,7 @@ namespace P6.AspNet.CassandraIdentity3
         ICassandraDAO CassandraDAO { get; }
     }
 
-    public class IdentityCassandraContext : IdentityCassandraContext<IdentityUser, IdentityRole, string>
+    public class IdentityCassandraContext : IdentityCassandraContext<IdentityUser, IdentityRole, Guid>
     {
         public IdentityCassandraContext(CassandraConfig cassandraConfig) : base(cassandraConfig)
         {

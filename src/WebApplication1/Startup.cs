@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define ENTITY_IDENTITY
+#undef ENTITY_IDENTITY
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Security.Claims;
@@ -250,8 +252,10 @@ namespace WebApplication1
                     using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
                         .CreateScope())
                     {
+#if ENTITY_IDENTITY
                         serviceScope.ServiceProvider.GetService<Pingo.Authorization.Models.ApplicationDbContext>()
                             .Database.Migrate();
+#endif
                     }
                 }
                 catch

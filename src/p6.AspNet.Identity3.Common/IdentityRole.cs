@@ -6,14 +6,14 @@ namespace p6.AspNet.Identity3.Common
     /// <summary>
     /// Represents a Role entity
     /// </summary>
-    public class IdentityRole : IdentityRole<string>
+    public class IdentityRole : IdentityRole<Guid>
     {
         /// <summary>
         /// Constructor
         /// </summary>
         public IdentityRole() : base()
         {
-            Id = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid();
         }
 
         /// <summary>

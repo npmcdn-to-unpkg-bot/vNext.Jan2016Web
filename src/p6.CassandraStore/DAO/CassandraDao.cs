@@ -10,7 +10,7 @@ namespace p6.CassandraStore.DAO
         private  Cluster Cluster => _cluster ?? (_cluster = Connect());
 
         private ISession _session;
-        private ISession Session => _session ?? (_session = Cluster.Connect());
+        private ISession Session => _session ?? (_session = Cluster.Connect(CassandraConfig.KeySpace));
 
         private CassandraConfig CassandraConfig { get; }
 
