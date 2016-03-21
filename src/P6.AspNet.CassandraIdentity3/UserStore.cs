@@ -22,10 +22,10 @@ namespace P6.AspNet.CassandraIdentity3
     }
 
     public class UserStore<TUser, TRole, TKey> : UserStoreCommon<TUser, TRole, TKey>
-         where TUser : IdentityUser<TKey>, new()
+        where TUser : IdentityUser, new()
         where TRole : IdentityRole<TKey>
         where TKey : IEquatable<TKey>
-    {
+    { 
         private ISession _session;
         // Reusable prepared statements, lazy evaluated
         private readonly AsyncLazy<PreparedStatement> _createUserByUserName;
@@ -163,7 +163,7 @@ namespace P6.AspNet.CassandraIdentity3
             if (user == null) throw new ArgumentNullException(nameof(user));
             EnsureLoginsNotNull(user);
 
-            var userGuid = Guid.Parse(ConvertIdToString(user.Id));
+            var userGuid = user.Id;
 
             PreparedStatement[] prepared = await _removeLogin;
             var batch = new BatchStatement();
@@ -192,7 +192,7 @@ namespace P6.AspNet.CassandraIdentity3
             if (login == null) throw new ArgumentNullException(nameof(login));
             EnsureLoginsNotNull(user);
 
-            var userGuid = Guid.Parse(ConvertIdToString(user.Id));
+            var userGuid = user.Id;
 
             // check if login already exists for this provider and remove old details
             await RemoveLoginAsync(user, login.LoginProvider, login.ProviderKey, cancellationToken);
@@ -233,6 +233,27 @@ namespace P6.AspNet.CassandraIdentity3
             return existingUser != null;
         }
 
+        public override async Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            PreparedStatement prepared = await _getLogins;
+            BoundStatement bound = prepared.Bind(user.Id);
+
+            RowSet rows = await _session.ExecuteAsync(bound).ConfigureAwait(false);
+            
+            return rows.Select(row =>
+            {
+                var lp = row.GetValue<string>("login_provider");
+                var pk = row.GetValue<string>("provider_key");
+                var uli = new UserLoginInfo(lp, pk, lp);
+                return uli;
+            }).ToList();
+        }
+
         public override async Task<IdentityResult> UpdateAsync(TUser user,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -254,9 +275,60 @@ namespace P6.AspNet.CassandraIdentity3
                 user.PhoneNumber, user.PhoneNumberConfirmed,
                 user.Email, user.EmailConfirmed, user.Id));
 
+            // See if the username changed so we can decide whether we need a different users_by_username record
             string oldUserName;
-     
-            throw new NotImplementedException();
+            if (user.HasUserNameChanged(out oldUserName) == false && string.IsNullOrEmpty(user.UserName) == false)
+            {
+                // UPDATE users_by_username ... (since username hasn't changed)
+                batch.Add(prepared[1].Bind(user.PasswordHash, user.SecurityStamp, user.TwoFactorEnabled, user.AccessFailedCount,
+                                           user.LockoutEnabled, user.LockoutEnd, user.PhoneNumber, user.PhoneNumberConfirmed, user.Email,
+                                           user.EmailConfirmed, user.UserName));
+            }
+            else
+            {
+                // DELETE FROM users_by_username ... (delete old record since username changed)
+                if (string.IsNullOrEmpty(oldUserName) == false)
+                {
+                    batch.Add(prepared[2].Bind(oldUserName));
+                }
+
+                // INSERT INTO users_by_username ... (insert new record since username changed)
+                if (string.IsNullOrEmpty(user.UserName) == false)
+                {
+                    batch.Add(prepared[3].Bind(user.UserName, user.Id, user.PasswordHash, user.SecurityStamp, user.TwoFactorEnabled,
+                                               user.AccessFailedCount, user.LockoutEnabled, user.LockoutEnd, user.PhoneNumber,
+                                               user.PhoneNumberConfirmed, user.Email, user.EmailConfirmed));
+                }
+            }
+
+            // See if the email changed so we can decide if we need a different users_by_email record
+            string oldEmail;
+            if (user.HasEmailChanged(out oldEmail) == false && string.IsNullOrEmpty(user.Email) == false)
+            {
+                // UPDATE users_by_email ... (since email hasn't changed)
+                batch.Add(prepared[4].Bind(user.UserName, user.PasswordHash, user.SecurityStamp, user.TwoFactorEnabled, user.AccessFailedCount,
+                                           user.LockoutEnabled, user.LockoutEnd, user.PhoneNumber, user.PhoneNumberConfirmed,
+                                           user.EmailConfirmed, user.Email));
+            }
+            else
+            {
+                // DELETE FROM users_by_email ... (delete old record since email changed)
+                if (string.IsNullOrEmpty(oldEmail) == false)
+                {
+                    batch.Add(prepared[5].Bind(oldEmail));
+                }
+
+                // INSERT INTO users_by_email ... (insert new record since email changed)
+                if (string.IsNullOrEmpty(user.Email) == false)
+                {
+                    batch.Add(prepared[6].Bind(user.Email, user.Id, user.UserName, user.PasswordHash, user.SecurityStamp, user.TwoFactorEnabled,
+                                           user.AccessFailedCount, user.LockoutEnabled, user.LockoutEnd, user.PhoneNumber,
+                                           user.PhoneNumberConfirmed, user.EmailConfirmed));
+                }
+            }
+
+            await _session.ExecuteAsync(batch).ConfigureAwait(false);
+            return IdentityResult.Success;
         }
 
         public override  async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -269,7 +341,7 @@ namespace P6.AspNet.CassandraIdentity3
             PreparedStatement[] prepared = await _createUser;
             var batch = new BatchStatement();
 
-            var userGuid = Guid.Parse(ConvertIdToString(user.Id));
+            var userGuid = user.Id;
             // INSERT INTO users ...
             batch.Add(prepared[0].Bind(
                 userGuid, user.UserName,
@@ -389,30 +461,43 @@ namespace P6.AspNet.CassandraIdentity3
             if (loginResult == null)
                 return null;
 
-            return await FindByIdAsync(loginResult.GetValue<Guid>("userid").ToString(),
+            var user = await FindByIdAsync(loginResult.GetValue<Guid>("userid").ToString(),
                 cancellationToken);
-
+            return user;
         }
         
         private static TUser FromRow(Row row)
         {
             if (row == null)
                 return null;
-            return new TUser
+            var offset = row.GetValue<DateTimeOffset?>("lockout_end_date");
+
+            var user = new TUser
             {
                 AccessFailedCount = row.GetValue<int>("access_failed_count"),
                 Email = row.GetValue<string>("email"),
                 EmailConfirmed = row.GetValue<bool>("email_confirmed"),
-                Id = ConvertIdFromString(row.GetValue<Guid>("userid").ToString()),
+                Id = row.GetValue<Guid>("userid"),
                 LockoutEnabled = row.GetValue<bool>("lockout_enabled"),
-                LockoutEnd = row.GetValue<DateTimeOffset>("lockout_end_date"),
+                LockoutEnd = row.GetValue<DateTimeOffset?>("lockout_end_date"),
                 PasswordHash = row.GetValue<string>("password_hash"),
                 PhoneNumber = row.GetValue<string>("phone_number"),
                 PhoneNumberConfirmed = row.GetValue<bool>("phone_number_confirmed"),
                 SecurityStamp = row.GetValue<string>("security_stamp"),
                 TwoFactorEnabled = row.GetValue<bool>("two_factor_enabled"),
-                UserName = row.GetValue<string>("username"),
+                UserName = row.GetValue<string>("username")
             };
+            user.MakeOriginal();
+            return user;
+        }
+
+        protected override string ConvertIdToString(Guid id)
+        {
+            if (id == null || id.Equals(default(TKey)))
+            {
+                return null;
+            }
+            return id.ToString();
         }
     }
     public abstract class UserStoreCommon<TUser, TRole, TKey> :
@@ -426,7 +511,7 @@ namespace P6.AspNet.CassandraIdentity3
         IUserPhoneNumberStore<TUser>,
         IQueryableUserStore<TUser>,
         IUserTwoFactorStore<TUser>
-        where TUser : IdentityUser<TKey>,new()
+        where TUser : IdentityUser, new()
         where TRole : IdentityRole<TKey>
         where TKey : IEquatable<TKey>
     {
@@ -446,13 +531,15 @@ namespace P6.AspNet.CassandraIdentity3
         /// </summary>
         protected IdentityErrorDescriber ErrorDescriber { get; set; }
 
+
         /// <summary>
         /// Gets the user identifier for the specified <paramref name="user"/>, as an asynchronous operation.
         /// </summary>
         /// <param name="user">The user whose identifier should be retrieved.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the identifier for the specified <paramref name="user"/>.</returns>
-        public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetUserIdAsync(TUser user,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -557,10 +644,16 @@ namespace P6.AspNet.CassandraIdentity3
         public abstract Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey,
             CancellationToken cancellationToken);
 
-        public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        /// Retrieves the associated logins for the specified <param ref="user"/>, as an asynchronous operation.
+        /// </summary>
+        /// <param name="user">The user whose associated logins to retrieve.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+        /// <returns>
+        /// The <see cref="Task"/> for the asynchronous operation, containing a list of <see cref="UserLoginInfo"/> for the specified <paramref name="user"/>, if any.
+        /// </returns>
+        public abstract Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user,
+            CancellationToken cancellationToken);
 
         public abstract Task<TUser> FindByLoginAsync(string loginProvider, string providerKey,
             CancellationToken cancellationToken);
@@ -575,14 +668,43 @@ namespace P6.AspNet.CassandraIdentity3
             throw new NotImplementedException();
         }
 
-        public Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+		/// Gets a list of role names the specified <paramref name="user"/> belongs to, as an asynchronous operation.
+		/// </summary>
+		/// <param name="user">The user whose role names to retrieve.</param>
+		/// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+		/// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing a list of role names.</returns>
+		public Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            EnsureRolesNotNull(user);
+
+            IList<string> roleNames = user.Roles.Select(r => r.Name).ToList();
+            return Task.FromResult(roleNames);
         }
 
+
+        /// <summary>
+        /// Returns a flag indicating whether the specified <paramref name="user"/> is a member of the give named role, as an asynchronous operation.
+        /// </summary>
+        /// <param name="user">The user whose role membership should be checked.</param>
+        /// <param name="normalizedRoleName">The normalized name of the role to be checked.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing a flag indicating whether the specified <see cref="user"/> is
+        /// a member of the named role.
+        /// </returns>
         public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (string.IsNullOrWhiteSpace(roleName)) throw new ArgumentNullException(nameof(roleName));
+            EnsureRolesNotNull(user);
+
+            return Task.FromResult(user.Roles.Any(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase)));
         }
 
         public Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
@@ -590,9 +712,24 @@ namespace P6.AspNet.CassandraIdentity3
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets a list of all (ie both User.Claims and User.Roles.Claims) <see cref="Claim"/>s to be belonging to the specified <paramref name="user"/> as an asynchronous operation.
+        /// </summary>
+        /// <param name="user">The role whose claims to retrieve.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+        /// <returns>
+        /// A <see cref="Task{TResult}"/> that represents the result of the asynchronous query, a list of <see cref="Claim"/>s.
+        /// </returns>
         public Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            EnsureClaimsNotNull(user);
+            EnsureRolesNotNull(user);
+
+            IList<Claim> result = user.AllClaims.Select(c => new Claim(c.ClaimType, c.ClaimValue)).ToList();
+            return Task.FromResult(result);
         }
 
         public Task<IList<TUser>> GetUsersForClaimAsync(System.Security.Claims.Claim claim, CancellationToken cancellationToken = default(CancellationToken))
@@ -626,29 +763,87 @@ namespace P6.AspNet.CassandraIdentity3
             throw new NotImplementedException();
         }
 
-        public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+		/// Sets a flag indicating whether the specified <paramref name="user "/>has two factor authentication enabled or not,
+		/// as an asynchronous operation.
+		/// </summary>
+		/// <param name="user">The user whose two factor authentication enabled status should be set.</param>
+		/// <param name="enabled">A flag indicating whether the specified <paramref name="user"/> has two factor authentication enabled.</param>
+		/// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+		/// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+		public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            user.TwoFactorEnabled = enabled;
+            return Task.FromResult(0);
         }
 
-        public Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+		/// Returns a flag indicating whether the specified <paramref name="user "/>has two factor authentication enabled or not,
+		/// as an asynchronous operation.
+		/// </summary>
+		/// <param name="user">The user whose two factor authentication enabled status should be set.</param>
+		/// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+		/// <returns>
+		/// The <see cref="Task"/> that represents the asynchronous operation, containing a flag indicating whether the specified 
+		/// <paramref name="user "/>has two factor authentication enabled or not.
+		/// </returns>
+		public Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            return Task.FromResult(user.TwoFactorEnabled);
         }
 
-        public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+		/// Sets the password hash for the specified <paramref name="user"/>, as an asynchronous operation.
+		/// </summary>
+		/// <param name="user">The user whose password hash to set.</param>
+		/// <param name="passwordHash">The password hash to set.</param>
+		/// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+		/// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+		public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            user.PasswordHash = passwordHash;
+            return Task.FromResult(0);
         }
 
-        public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+		/// Gets the password hash for the specified <paramref name="user"/>, as an asynchronous operation.
+		/// </summary>
+		/// <param name="user">The user whose password hash to retrieve.</param>
+		/// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+		/// <returns>The <see cref="Task"/> that represents the asynchronous operation, returning the password hash for the specified <paramref name="user"/>.</returns>
+		public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            return Task.FromResult(user.PasswordHash);
         }
 
-        public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+		/// Gets a flag indicating whether the specified <paramref name="user"/> has a password, as an asynchronous operation.
+		/// </summary>
+		/// <param name="user">The user to return a flag for, indicating whether they have a password or not.</param>
+		/// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be cancelled.</param>
+		/// <returns>
+		/// The <see cref="Task"/> that represents the asynchronous operation, returning true if the specified <paramref name="user"/> has a password
+		/// otherwise false.
+		/// </returns>
+		public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            return Task.FromResult(!string.IsNullOrWhiteSpace(user.PasswordHash));
         }
         #region IUserSecurityStampStore<TUser>
 
@@ -990,7 +1185,7 @@ namespace P6.AspNet.CassandraIdentity3
             }
             return (TKey)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(id);
         }
-        protected virtual string ConvertIdToString(TKey id)
+        protected virtual string ConvertIdToString(Guid id)
         {
             if (id == null || id.Equals(default(TKey)))
             {
@@ -1037,7 +1232,10 @@ namespace P6.AspNet.CassandraIdentity3
 
         protected virtual void EnsureRolesNotNull(TUser user)
         {
-            if (user.Roles == null) user.Roles = new List<TRole>().Cast<IdentityRole<TKey>>().ToList();
+            if (user.Roles == null)
+                user.Roles = new List<IdentityRole<Guid>>();
+
+               // user.Roles = new List<TRole>().Cast<IdentityRole<TKey>>().ToList();
         }
 
     }

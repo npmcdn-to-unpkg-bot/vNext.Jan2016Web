@@ -8,7 +8,7 @@ namespace P6.AspNet.CassandraIdentity3
 {
     public interface IIdentityCassandraContext<TUser, TRole, TKey>
         where TRole : IdentityRole<TKey>
-        where TUser : IdentityUser<TKey>
+        where TUser : IdentityUser
         where TKey : IEquatable<TKey>
     {
         ICassandraDAO CassandraDAO { get; }
@@ -23,7 +23,7 @@ namespace P6.AspNet.CassandraIdentity3
 
     public class IdentityCassandraContext<TUser, TRole, TKey> : IIdentityCassandraContext<TUser, TRole, TKey>
         where TRole : IdentityRole<TKey>
-        where TUser : IdentityUser<TKey>
+        where TUser : IdentityUser
         where TKey : IEquatable<TKey>
     {
         private CassandraConfig _cassandraConfig { get; set; }

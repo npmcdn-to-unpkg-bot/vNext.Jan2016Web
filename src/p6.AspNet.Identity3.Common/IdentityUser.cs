@@ -6,15 +6,20 @@ using Microsoft.AspNet.Identity;
 
 namespace p6.AspNet.Identity3.Common
 {
-	public class IdentityUser : IdentityUser<Guid>
-	{
-	    private string _originalUserName;
+	public class IdentityUser : IdentityUser<IdentityRole<Guid>, Guid>
+    {
+        private string _originalUserName;
+        private string _originalEmail;
 
-	    public IdentityUser() : base()
-		{
-			Id = Guid.NewGuid();
-		}
-
+	    public IdentityUser()
+	    {
+	        this.Id = Guid.NewGuid();
+	    }
+        public void  MakeOriginal()
+	    {
+            _originalUserName = UserName;
+            _originalEmail = Email;
+        }
         /// <summary>
         /// Indicates whether the username for the user has changed from the original username used when the CassandraUser was
         /// created/loaded from C*.  Returns the original username in an out parameter if true.
@@ -24,34 +29,22 @@ namespace p6.AspNet.Identity3.Common
             originalUserName = _originalUserName;
             return UserName != _originalUserName;
         }
+        /// <summary>
+        /// Indicates whether the email address for the user has changed from the original email used when the CassandraUser was
+        /// created/loaded from C*.  Returns the original email in an out parameter if true.
+        /// </summary>
+        public bool HasEmailChanged(out string originalEmail)
+        {
+            originalEmail = _originalEmail;
+            return Email != _originalEmail;
+        }
     }
-
-	public class IdentityUser<TKey> : IdentityUser<IdentityRole<TKey>, TKey>
-		where TKey : IEquatable<TKey>
-	{
-        private string _originalUserName;
-        public IdentityUser() : base()
-		{
-        }
-
-		public IdentityUser(string userName) : base(userName)
-		{
-            _originalUserName = UserName;
-        }
-	}
-
+    
     public class IdentityUser<TRole, TKey>
             where TRole : IdentityRole<TKey>
             where TKey : IEquatable<TKey>
     {
-
-  
         public IdentityUser() { }
-
-        public IdentityUser(string userName) : this()
-        {
-            UserName = userName;
-        }
 
         public virtual TKey Id { get; set; }
         public virtual string UserName { get; set; }

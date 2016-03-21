@@ -9,18 +9,18 @@ using p6.AspNet.Identity3.Common;
 
 namespace P6.AspNet.CassandraIdentity3
 {
-    public class RoleStore<TUser, TRole> : RoleStore<TUser, TRole, string>
-    where TUser : IdentityUser<string>
-    where TRole : IdentityRole<string>
+    public class RoleStore<TUser, TRole> : RoleStore<TUser, TRole, Guid>
+    where TUser : IdentityUser
+    where TRole : IdentityRole
     {
-        public RoleStore(IIdentityCassandraContext<TUser, TRole, string> databaseContext, 
+        public RoleStore(IIdentityCassandraContext<TUser, TRole, Guid> databaseContext, 
             ILookupNormalizer normalizer = null, IdentityErrorDescriber describer = null) : base(databaseContext, normalizer, describer) { }
     }
 
     public class RoleStore<TUser, TRole, TKey> :
         IQueryableRoleStore<TRole>,
         IRoleClaimStore<TRole>
-        where TUser : IdentityUser<TKey>
+        where TUser : IdentityUser
         where TRole : IdentityRole<TKey>
         where TKey : IEquatable<TKey>
     {

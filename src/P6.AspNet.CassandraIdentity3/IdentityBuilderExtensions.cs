@@ -13,7 +13,7 @@ namespace P6.AspNet.CassandraIdentity3
     {
         public static IdentityBuilder AddCassandraIdentityStores<TContext>(this IdentityBuilder builder,
             Action<TContext> optionsAction = null)
-            where TContext : IIdentityCassandraContext<IdentityUser<string>, IdentityRole<string>, string>
+            where TContext : IIdentityCassandraContext<IdentityUser, IdentityRole<Guid>, Guid>
         {
             builder.Services.TryAdd(GetDefaultServices(builder.UserType, builder.RoleType, typeof (TContext), null,
                 optionsAction));
@@ -22,8 +22,8 @@ namespace P6.AspNet.CassandraIdentity3
 
         public static IdentityBuilder AddCassandraIdentityStores<TContext, TUser>(this IdentityBuilder builder, 
             Action<TContext> optionsAction = null)
-            where TContext : IIdentityCassandraContext<TUser, IdentityRole<string>, string>
-            where TUser : IdentityUser<string>
+            where TContext : IIdentityCassandraContext<TUser, IdentityRole<Guid>, Guid>
+            where TUser : IdentityUser
         {
             builder.Services.TryAdd(GetDefaultServices(typeof(TUser), builder.RoleType, typeof(TContext), null, optionsAction));
             return builder;
@@ -32,7 +32,7 @@ namespace P6.AspNet.CassandraIdentity3
         public static IdentityBuilder AddCassandraIdentityStores<TContext, TUser, TKey>(this IdentityBuilder builder, 
             Action<TContext> optionsAction = null)
             where TContext : IIdentityCassandraContext<TUser, IdentityRole<TKey>, TKey>
-            where TUser : IdentityUser<TKey>
+            where TUser : IdentityUser
             where TKey : IEquatable<TKey>
         {
             builder.Services.TryAdd(GetDefaultServices(typeof(TUser), builder.RoleType, typeof(TContext), typeof(TKey), optionsAction));
@@ -43,7 +43,7 @@ namespace P6.AspNet.CassandraIdentity3
             Action<TContext> optionsAction = null)
             where TContext : IIdentityCassandraContext<TUser, TRole, TKey>
             where TRole : IdentityRole<TKey>
-            where TUser : IdentityUser<TKey>
+            where TUser : IdentityUser
             where TKey : IEquatable<TKey>
         {
             builder.Services.TryAdd(GetDefaultServices(typeof (TUser), typeof (TRole), typeof (TContext), typeof (TKey),
