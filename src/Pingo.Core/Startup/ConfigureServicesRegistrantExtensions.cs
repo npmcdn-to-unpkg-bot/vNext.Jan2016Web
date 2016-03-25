@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pingo.Core.Reflection;
 using Serilog;
@@ -12,7 +13,7 @@ namespace Pingo.Core.Startup
     {
          static ILogger logger = Log.ForContext<AutofacModule>();
 
-        public static IServiceCollection AddAllConfigureServicesRegistrants(this IServiceCollection services)
+        public static IServiceCollection AddAllConfigureServicesRegistrants(this IServiceCollection services, IConfiguration configuration)
         {
             bool bCaughtException = false;
             logger.Information("AddAllConfigureServicesRegistrants Enter");
@@ -21,7 +22,7 @@ namespace Pingo.Core.Startup
             foreach (var type in types)
             {
                 logger.Information("Found:{0}", type);
-                var instance = (IConfigureServicesRegistrant) Activator.CreateInstance(type);
+                var instance = (IConfigureServicesRegistrant) Activator.CreateInstance(type, configuration);
                 try
                 {
                     instance.OnConfigureServices(services);

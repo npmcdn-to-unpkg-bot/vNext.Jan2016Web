@@ -1,5 +1,5 @@
 ﻿#define ENTITY_IDENTITY
-#undef ENTITY_IDENTITY
+//#undef ENTITY_IDENTITY
 
 using System;
 using System.Reflection;
@@ -12,6 +12,7 @@ using Pingo.Core.IoC;
 using Pingo.Core.Startup;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using P6.AspNet.CassandraIdentity3;
 using Pingo.Authorization.Models;
 
@@ -55,6 +56,10 @@ namespace Pingo.Authorization
                 .AddCassandraIdentityStores<ApplicationDbContext, Models.ApplicationUser, CassandraIdentityRole, Guid>()
                 .AddDefaultTokenProviders();
 #endif
+        }
+
+        public MyConfigureServicesRegistrant(IConfigurationRoot configuration) : base(configuration)
+        {
         }
     }
 

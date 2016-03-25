@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNet.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pingo.Core.Reflection;
 using Serilog;

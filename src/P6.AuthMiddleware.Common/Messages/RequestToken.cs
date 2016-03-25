@@ -3,20 +3,20 @@
 
 using Microsoft.AspNet.Http.Authentication;
 
-namespace Microsoft.AspNet.Authentication.DeveloperAuth
+namespace Microsoft.AspNet.Authentication.P6Common.Messages
 {
     /// <summary>
-    /// The DeveloperAuth request token obtained from the request token endpoint.
+    /// The Auth request token obtained from the request token endpoint.
     /// </summary>
     public class RequestToken
     {
         /// <summary>
-        /// Gets or sets the DeveloperAuth request token.
+        /// Gets or sets the Auth request token.
         /// </summary>
         public string Token { get; set; }
 
         /// <summary>
-        /// Gets or sets the DeveloperAuth token secret.
+        /// Gets or sets the Auth token secret.
         /// </summary>
         public string TokenSecret { get; set; }
 

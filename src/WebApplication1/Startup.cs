@@ -1,10 +1,9 @@
 ﻿#define ENTITY_IDENTITY
-#undef ENTITY_IDENTITY
+//#undef ENTITY_IDENTITY
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using Basic.Swagger;
 using Microsoft.AspNet.Antiforgery;
 using Microsoft.AspNet.Authentication.DeveloperAuth;
@@ -21,19 +20,17 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Newtonsoft.Json.Serialization;
-using P6IdentityServer4.IdentityServerApp.Configuration;
-using P6IdentityServer4.IdentityServerApp.Extensions;
 using Pingo.Core;
 using Pingo.Core.IoC;
 using Pingo.Core.Middleware;
 using Pingo.Core.Reflection;
-using Pingo.Core.Settings;
 using Pingo.Core.Startup;
 using Serilog;
 using Serilog.Sinks.RollingFile;
 using Swashbuckle.SwaggerGen.Generator;
 using System.Linq;
 using Microsoft.AspNet.Identity;
+using Microsoft.Extensions.OptionsModel;
 using p6.CassandraStore.Settings;
 
 
@@ -68,6 +65,7 @@ namespace WebApplication1
 
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
+                .AddJsonFile(@"App_Data\appsettings-SSO.json")
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile("appsettings-filters.json")
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
@@ -92,6 +90,7 @@ namespace WebApplication1
         {
             services.AddInstance<IHostingEnvironment>(_hostingEnvironment);
             services.AddInstance<IApplicationEnvironment>(_appEnvironment);
+            services.AddOptions();
 
             services.AddAuthentication();
 
@@ -149,16 +148,16 @@ namespace WebApplication1
                 });
             }
 
+            services.AddLogging();
             services.AddWebEncoders();
             services.AddCors();
 
             services.AddCaching(); // Memory Caching stuff
+            services.AddSession();
 
             // register the global configuration root 
             services.AddSingleton<IConfigurationRoot, GlobalConfigurationRoot>();
 
-            services.AddOptions();
-            services.Configure<FiltersConfig>(Configuration.GetSection(FiltersConfig.WellKnown_SectionName));
             services.Configure<CassandraConfig>(Configuration.GetSection(CassandraConfig.WellKnown_SectionName));
 
 
@@ -180,7 +179,7 @@ namespace WebApplication1
                 options.Cookies.ApplicationCookie.LogoutPath = new Microsoft.AspNet.Http.PathString("/Identity/Account/LogOff");
             });
 
-            services.AddAllConfigureServicesRegistrants();
+            services.AddAllConfigureServicesRegistrants(Configuration);
             // autofac auto registration
             services.AddDependencies();
             var serviceProvider = services.BuildServiceProvider(Configuration);
@@ -195,7 +194,7 @@ namespace WebApplication1
         public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
-            app.UseIdentity()
+            app.UseIdentity() 
                 .UseDeveloperAuthAuthentication(
                     new DeveloperAuthOptions()
                     {
@@ -291,6 +290,8 @@ namespace WebApplication1
             app.UseStaticFiles();
 
 
+            // IMPORTANT: This session call MUST go before UseMvc()
+            app.UseSession();
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 

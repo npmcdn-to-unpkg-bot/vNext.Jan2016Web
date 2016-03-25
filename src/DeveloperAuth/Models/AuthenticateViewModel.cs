@@ -1,4 +1,6 @@
-﻿namespace Microsoft.AspNet.Authentication.DeveloperAuth.Models
+﻿using Microsoft.AspNet.Authentication.P6Common.Messages;
+
+namespace Microsoft.AspNet.Authentication.DeveloperAuth.Models
 {
     public class LoginModel
     {

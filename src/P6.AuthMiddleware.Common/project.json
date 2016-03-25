@@ -1,15 +1,12 @@
-{
+﻿{
   "version": "1.0.0-*",
-  "description": "P6.IdentityServer4 Class Library",
+  "description": "P6.AuthMiddleware.Common Class Library",
   "authors": [ "Herb" ],
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",
   "frameworks": {
-    "net451": {
-        "dependencies": {
-        }
-    },
+    "net451": { },
     "dotnet5.4": {
       "dependencies": {
         "Microsoft.CSharp": "4.0.1-beta-23516",
@@ -21,10 +18,6 @@
     }
   },
   "dependencies": {
-    "Autofac": "4.0.0-rc1-177",
-    "IdentityServer4": "1.0.0-beta1-update1",
-    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
-    "Pingo.Core": "1.0.0-*",
-    "Serilog": "2.0.0-beta-523"
+    "Microsoft.AspNet.Authentication": "1.0.0-rc1-final"
   }
 }

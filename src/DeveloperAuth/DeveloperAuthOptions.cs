@@ -3,6 +3,8 @@
 
 using System;
 using System.Net.Http;
+using System.Security.Claims;
+using Microsoft.AspNet.Authentication.P6Common.Messages;
 using Microsoft.AspNet.Http;
 
 namespace Microsoft.AspNet.Authentication.DeveloperAuth

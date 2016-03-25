@@ -19,6 +19,7 @@
     },
   "dependencies": {
     "Microsoft.AspNet.Authentication": "1.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final"
+    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+    "P6.AuthMiddleware.Common": "1.0.0-*"
   }
 }

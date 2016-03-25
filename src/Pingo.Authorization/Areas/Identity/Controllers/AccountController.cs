@@ -135,6 +135,15 @@ namespace Pingo.Authorization.Areas.Identity.Controllers
 //            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> FastLogOff()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation(4, "User logged out.");
+            return RedirectToLocal("/");
+            //            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
         //
         // POST: /Account/ExternalLogin
         [HttpPost]

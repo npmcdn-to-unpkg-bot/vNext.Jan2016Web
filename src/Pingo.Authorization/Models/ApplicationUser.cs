@@ -1,5 +1,5 @@
 ﻿#define ENTITY_IDENTITY
-#undef ENTITY_IDENTITY
+//#undef ENTITY_IDENTITY
 namespace Pingo.Authorization.Models
 {
 #if ENTITY_IDENTITY

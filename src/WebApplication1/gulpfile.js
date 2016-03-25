@@ -99,7 +99,6 @@ gulp.task('copy:Pingo.Authorization:areas', function () {
 
 
 
-
 gulp.task('watch', [
         'copy:p6.main',
         'copy:p6.main:areas',
@@ -111,7 +110,7 @@ gulp.task('watch', [
         'copy:Pingo.Authorization:areas',
         'copy:DeveloperAuth'
     ],
-    function() {
+    function () {
         gulp.watch(['../p6.main/Views/**'], ['copy:p6.main']);
         gulp.watch(['../p6.main/Areas/**'], ['copy:p6.main:areas']);
         gulp.watch(['../Hello.Polymer/Areas/**'], ['copy:Hello.Polymer:areas']);
@@ -121,6 +120,7 @@ gulp.task('watch', [
         gulp.watch(['../p6.sports/Areas/**'], ['copy:p6.sports:areas']);
         gulp.watch(['../p6.animals/Areas/**'], ['copy:p6.animals:areas']);
         gulp.watch(['../Pingo.Authorization/Areas/**'], ['copy:Pingo.Authorization:areas']);
+      
     });
 
 gulp.task("min", ["min:js", "min:css"]);

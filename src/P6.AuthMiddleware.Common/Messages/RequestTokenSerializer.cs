@@ -6,10 +6,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.AspNet.Http.Authentication;
 
-namespace Microsoft.AspNet.Authentication.DeveloperAuth
+namespace Microsoft.AspNet.Authentication.P6Common.Messages
 {
     /// <summary>
-    /// Serializes and deserializes DeveloperAuth request and access tokens so that they can be used by other application components.
+    /// Serializes and deserializes Auth request and access tokens so that they can be used by other application components.
     /// </summary>
     public class RequestTokenSerializer : IDataSerializer<RequestToken>
     {
@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         /// Deserializes a request token.
         /// </summary>
         /// <param name="data">A byte array containing the serialized token</param>
-        /// <returns>The DeveloperAuth request token</returns>
+        /// <returns>The Auth request token</returns>
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times",
             Justification = "Dispose is idempotent")]
         public virtual RequestToken Deserialize(byte[] data)
@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         }
 
         /// <summary>
-        /// Writes a DeveloperAuth request token as a series of bytes. Used by the <see cref="Serialize"/> method.
+        /// Writes a Auth request token as a series of bytes. Used by the <see cref="Serialize"/> method.
         /// </summary>
         /// <param name="writer">The writer to use in writing the token</param>
         /// <param name="token">The token to write</param>
@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.Authentication.DeveloperAuth
         }
 
         /// <summary>
-        /// Reads a DeveloperAuth request token from a series of bytes. Used by the <see cref="Deserialize"/> method.
+        /// Reads a Auth request token from a series of bytes. Used by the <see cref="Deserialize"/> method.
         /// </summary>
         /// <param name="reader">The reader to use in reading the token bytes</param>
         /// <returns>The token</returns>

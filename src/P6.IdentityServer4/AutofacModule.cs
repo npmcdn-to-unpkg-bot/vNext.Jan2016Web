@@ -7,6 +7,7 @@ using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.OptionsModel;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -54,6 +55,10 @@ namespace P6IdentityServer4
 
             builder.AddCustomGrantValidator<CustomGrantValidator>();
 
+        }
+
+        public MyConfigureServicesRegistrant(IConfigurationRoot configuration) : base(configuration)
+        {
         }
     }
 

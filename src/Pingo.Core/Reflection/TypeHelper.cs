@@ -16,9 +16,7 @@ namespace Pingo.Core.Reflection
 
         public static bool IsType(Type type)
         {
-            return
-                typeof(T).IsAssignableFrom(type) &&
-                type.GetConstructor(Type.EmptyTypes) != null;
+            return typeof(T).IsAssignableFrom(type);
         }
 
         public static bool IsSubclassOf(Type type)

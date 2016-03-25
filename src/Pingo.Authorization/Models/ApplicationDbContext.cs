@@ -1,5 +1,5 @@
 ﻿#define ENTITY_IDENTITY
-#undef ENTITY_IDENTITY
+//#undef ENTITY_IDENTITY
 
 using System;
 using Microsoft.Data.Entity;
