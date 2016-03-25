@@ -65,7 +65,6 @@ namespace WebApplication1
 
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddJsonFile(@"App_Data\appsettings-SSO.json")
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile("appsettings-filters.json")
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
