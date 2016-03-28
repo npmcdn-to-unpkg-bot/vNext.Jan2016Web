@@ -66,6 +66,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "P6.AspNet.CassandraIdentity
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "P6.AuthMiddleware.Common", "src\P6.AuthMiddleware.Common\P6.AuthMiddleware.Common.xproj", "{50D7D7E0-A741-47DA-B59C-F12313358350}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Console.IdentityServer4.Cassandra", "src\Console.IdentityServer4.Cassandra\Console.IdentityServer4.Cassandra.xproj", "{9D54DFD3-A95E-45C5-994F-96B7E96170C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -156,6 +158,10 @@ Global
 		{50D7D7E0-A741-47DA-B59C-F12313358350}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50D7D7E0-A741-47DA-B59C-F12313358350}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50D7D7E0-A741-47DA-B59C-F12313358350}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D54DFD3-A95E-45C5-994F-96B7E96170C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D54DFD3-A95E-45C5-994F-96B7E96170C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D54DFD3-A95E-45C5-994F-96B7E96170C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D54DFD3-A95E-45C5-994F-96B7E96170C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -189,5 +195,6 @@ Global
 		{9B6BE70C-3204-43A3-B727-AEA8C565DC49} = {CAE3AF4C-AB1D-4E06-8B5E-944A90F3441C}
 		{53032338-2240-4A8D-BCB3-A1305DD755C2} = {CAE3AF4C-AB1D-4E06-8B5E-944A90F3441C}
 		{50D7D7E0-A741-47DA-B59C-F12313358350} = {D9374238-8779-4E2B-B2AD-070593BD72D6}
+		{9D54DFD3-A95E-45C5-994F-96B7E96170C3} = {B01519A7-39F9-498C-ACEA-588E7F8FA54B}
 	EndGlobalSection
 EndGlobal

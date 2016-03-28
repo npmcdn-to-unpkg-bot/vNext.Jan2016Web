@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0-*",
+  "description": "Console.IdentityServer4.Cassandra Console Application",
+  "authors": [ "Dev" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Newtonsoft.Json": "8.0.3"
+  },
+
+  "commands": {
+    "Console.IdentityServer4.Cassandra": "Console.IdentityServer4.Cassandra"
+  },
+
+  "frameworks": {
+    "dnx451": {
+        "dependencies": {
+            "CassandraCSharpDriver": "3.0.4",
+            "p6.CassandraStore": "1.0.0-*"
+        }
+    }
+   
+  }
+}
