@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Console.IdentityServer4.Cassandra.Models;
+﻿using System.Collections.Generic;
+using IdentityServer4.Core.Models;
 
-namespace Console.IdentityServer4.Cassandra.Models
+namespace IdentityServer4.DataTypes.Cassandra
 {
     /*
-    CREATE TYPE IF NOT EXISTS Client (
+CREATE TYPE IF NOT EXISTS Client (
   AbsoluteRefreshTokenLifetime int,
   AccessTokenLifetime int,
   AccessTokenType int,
@@ -52,79 +49,6 @@ namespace Console.IdentityServer4.Cassandra.Models
 );
 
     */
-    // Colors colorValue = (Colors)Enum.Parse(typeof(Colors), colorString);
-    //
-    // Summary:
-    //     Access token types.
-    public enum AccessTokenType
-    {
-        //
-        // Summary:
-        //     Self-contained Json Web Token
-        Jwt ,
-        //
-        // Summary:
-        //     Reference token
-        Reference
-    }
-    //
-    // Summary:
-    //     OpenID Connect flows.
-    public enum Flows
-    {
-        //
-        // Summary:
-        //     authorization code flow
-        AuthorizationCode = 0,
-        //
-        // Summary:
-        //     implicit flow
-        Implicit = 1,
-        //
-        // Summary:
-        //     hybrid flow
-        Hybrid = 2,
-        //
-        // Summary:
-        //     client credentials flow
-        ClientCredentials = 3,
-        //
-        // Summary:
-        //     resource owner password credential flow
-        ResourceOwner = 4,
-        //
-        // Summary:
-        //     custom grant
-        Custom = 5
-    }
-    //
-    // Summary:
-    //     Token expiration types.
-    public enum TokenExpiration
-    {
-        //
-        // Summary:
-        //     Sliding token expiration
-        Sliding = 0,
-        //
-        // Summary:
-        //     Absolute token expiration
-        Absolute = 1
-    }
-    //
-    // Summary:
-    //     Token usage types.
-    public enum TokenUsage
-    {
-        //
-        // Summary:
-        //     Re-use the refresh token handle
-        ReUse = 0,
-        //
-        // Summary:
-        //     Issue a new refresh token handle every time
-        OneTimeOnly = 1
-    }
 
     public class Client
     {
@@ -210,7 +134,7 @@ namespace Console.IdentityServer4.Cassandra.Models
         //     Client secrets - only relevant for flows that require a secret
         public IEnumerable<Secret> ClientSecrets { get; set; }
 
-        public IEnumerable<Claim> Claims { get; set; }
+        public IEnumerable<ClientClaim> Claims { get; set; }
 
         //
         // Summary:

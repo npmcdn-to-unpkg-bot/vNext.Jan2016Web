@@ -13,11 +13,47 @@ CREATE TYPE IF NOT EXISTS ClaimsIdentity (
 	Name text
 	
 );
-CREATE TYPE IF NOT EXISTS Claim (
+CREATE TYPE IF NOT EXISTS ClientClaim (
 	Type text,
 	Value text,
 	ValueType text
 );
+CREATE TYPE IF NOT EXISTS Consent(
+          SubjectId text,
+          ClientId text,
+          Scopes text
+        );
+
+CREATE TYPE IF NOT EXISTS IdentityToken (
+        Key text,
+        TokenType int,
+        SubjectId text,
+        ClientId text,
+        JsonCode text,
+        Expiry timestamp
+      );
+
+CREATE TYPE IF NOT EXISTS ScopeClaim (
+		Name text,
+		Description text,
+		AlwaysIncludeInIdToken boolean
+	);
+
+CREATE TYPE IF NOT EXISTS Scope(
+       Enabled boolean,
+       Name text,
+       DisplayName text,
+       Description text,
+       Required boolean,
+       Emphasize boolean,
+       Type int,
+       ScopeSecrets list<FROZEN<Secret>>,
+       ScopeClaims list<FROZEN<ScopeClaim>>,
+       AllowUnrestrictedIntrospection boolean,
+       IncludeAllClaimsForUser boolean,
+       ClaimsRule text,
+       ShowInDiscoveryDocument boolean
+    );
 
 CREATE TYPE IF NOT EXISTS Client (
   AbsoluteRefreshTokenLifetime int,
@@ -34,7 +70,7 @@ CREATE TYPE IF NOT EXISTS Client (
   AlwaysSendClientClaims boolean,
   AuthorizationCodeLifetime int,
 
-  Claims list<FROZEN<Claim>>,
+  Claims list<FROZEN<ClientClaim>>,
   ClientId text,
   ClientName text,
   ClientSecrets list<FROZEN<Secret>>,
@@ -69,4 +105,8 @@ CREATE TABLE IF NOT EXISTS Clients (
 	Client Frozen<Client>,
  	PRIMARY KEY (Id)
 );
-
+CREATE TABLE IF NOT EXISTS Scopes (
+	Id uuid,
+	Scope Frozen<Scope>,
+ 	PRIMARY KEY (Id)
+);

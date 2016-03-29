@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Runtime.CompilerServices;
-using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Cassandra;
-using Console.IdentityServer4.Cassandra.Models;
-
-using Newtonsoft.Json;
+using IdentityServer4.DataTypes.Cassandra;
 using p6.CassandraStore.DAO;
 using p6.CassandraStore.Settings;
-using Claim = Console.IdentityServer4.Cassandra.Models.Claim;
-
 
 namespace Console.IdentityServer4.Cassandra
 {
@@ -39,7 +35,7 @@ namespace Console.IdentityServer4.Cassandra
     public class Program
     {
 
-
+        public static MemoryCache MemoryCache { get; private set; }
         private static  AsyncLazy<PreparedStatement> _findById;
 
         private static ISession _cassandraSession = null;
@@ -65,7 +61,7 @@ namespace Console.IdentityServer4.Cassandra
 
                         _cassandraSession.UserDefinedTypes.Define(
                             UdtMap.For<Secret>(),
-                            UdtMap.For<Claim>(),
+                            UdtMap.For<ClientClaim>(),
                             UdtMap.For<Client>()
                                 .Map(a => a._AccessTokenType, "accesstokentype")
                                 .Map(a => a._Flow, "flow")
@@ -86,6 +82,8 @@ namespace Console.IdentityServer4.Cassandra
         {
             Task.Run(async () =>
             {
+                MemoryCache = new MemoryCache("Global");
+
                 // Do any async anything you need here without worry
 
                 var session = CassandraSession;
@@ -93,6 +91,7 @@ namespace Console.IdentityServer4.Cassandra
                 {
                     //ac4d5da0-8295-44ff-a448-e6d4119ea3ff
                     var client = await FindByIdAsync("ac4d5da0-8295-44ff-a448-e6d4119ea3ff");
+                    System.Console.WriteLine("{0}",client.ClientId);
                     System.Console.ReadLine();
 
                 }

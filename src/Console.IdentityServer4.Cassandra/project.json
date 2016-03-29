@@ -11,6 +11,9 @@
   },
 
   "dependencies": {
+    "IdentityServer4": "1.0.0-beta1-update1",
+    "IdentityServer4.DataTypes": "1.0.0-*",
+    "Microsoft.Extensions.Caching.Abstractions": "1.0.0-rc2-20019",
     "Newtonsoft.Json": "8.0.3"
   },
 
@@ -20,10 +23,13 @@
 
   "frameworks": {
     "dnx451": {
-        "dependencies": {
-            "CassandraCSharpDriver": "3.0.4",
-            "p6.CassandraStore": "1.0.0-*"
-        }
+      "dependencies": {
+        "CassandraCSharpDriver": "3.0.4",
+        "p6.CassandraStore": "1.0.0-*"
+      },
+      "frameworkAssemblies": {
+        "System.Runtime.Caching": "4.0.0.0"
+      }
     }
    
   }

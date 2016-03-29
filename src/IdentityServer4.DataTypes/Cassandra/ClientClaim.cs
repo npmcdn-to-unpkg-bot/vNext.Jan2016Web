@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Console.IdentityServer4.Cassandra.Models
+﻿namespace IdentityServer4.DataTypes.Cassandra
 {
     /*
     CREATE TYPE IF NOT EXISTS Claim (
@@ -12,7 +7,7 @@ namespace Console.IdentityServer4.Cassandra.Models
 	ValueType text
 );
     */
-    public class Claim
+    public class ClientClaim
     {
         public string Type { get; set; }
         public string Value { get; set; }

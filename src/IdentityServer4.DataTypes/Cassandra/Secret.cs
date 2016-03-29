@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Console.IdentityServer4.Cassandra.Models
+namespace IdentityServer4.DataTypes.Cassandra
 {
     /*
-    CREATE TYPE IF NOT EXISTS Secret (
-  Description text,
-  Expiration timestamp,
-  Type text,
-  Value text
-);
+        CREATE TYPE IF NOT EXISTS Secret (
+          Description text,
+          Expiration timestamp,
+          Type text,
+          Value text
+        );
 
     */
     public class Secret
