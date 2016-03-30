@@ -90,10 +90,19 @@ namespace Console.IdentityServer4.Cassandra
                 while (true)
                 {
                     //ac4d5da0-8295-44ff-a448-e6d4119ea3ff
-                    var client = await FindByIdAsync("ac4d5da0-8295-44ff-a448-e6d4119ea3ff");
-                    System.Console.WriteLine("{0}",client.ClientId);
-                    System.Console.ReadLine();
+                    try
+                    {
+                        //ac4d5da0-8295-44ff-a448-e6d4119ea3ff
+                        var client = await FindByIdAsync("ac4d5da0-8295-44ff-a448-e6d4119ea3ff");
+                        System.Console.WriteLine("{0}", client.ClientId);
 
+                        System.Console.ReadLine();
+                    }
+                    catch (Exception e)
+                    {
+                        _cassandraSession = null;
+                        Thread.Sleep(1000);
+                    }
                 }
             }).Wait();
 
