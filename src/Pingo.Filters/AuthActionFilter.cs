@@ -20,7 +20,7 @@ namespace Pingo.Filters
                              select claim;
                 if (!result.Any())
                 {
-                    context.Result = new HttpUnauthorizedResult();
+                    context.Result = new HttpStatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
                 }
             }
 

@@ -7,7 +7,7 @@ namespace WebApplication1.IdentityServerClients.Configuration
 {
     public static class Constants
     {
-        public const string BaseAddress = "http://localhost:14016";
+        public const string BaseAddress = "http://localhost:35767";
 
         public const string AuthorizeEndpoint = BaseAddress + "/connect/authorize";
         public const string LogoutEndpoint = BaseAddress + "/connect/endsession";

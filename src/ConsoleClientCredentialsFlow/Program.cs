@@ -1,6 +1,8 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,18 +14,55 @@ using WebApplication1.IdentityServerClients.Configuration;
 
 namespace ConsoleClientCredentialsFlow
 {
+    public static class HttpResponseMessageExtensions
+    {
+        public static async Task EnsureSuccessStatusCodeAsync(this HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.Content != null)
+                response.Content.Dispose();
+            throw new SimpleHttpResponseException(response.StatusCode, content);
+        }
+    }
+
+    public class SimpleHttpResponseException : Exception
+    {
+        public HttpStatusCode StatusCode { get; private set; }
+
+        public SimpleHttpResponseException(HttpStatusCode statusCode, string content) : base(content)
+        {
+            StatusCode = statusCode;
+        }
+    }
     public class Program
     {
-        public static void Main(string[] args)
+        static void Main()
+        {
+            RunAsync().Wait();
+        }
+
+        static async Task RunAsync()
         {
             var response = RequestToken();
             ShowResponse(response);
             Console.ReadLine();
             CallService(response.AccessToken, "identity4");
             Console.ReadLine();
-            CallService(response.AccessToken,"Sports/Work");
+
+            CallService(response.AccessToken, "apiv1/Identity4Auth");
+            Console.ReadLine();
+
+            CallService(response.AccessToken, "Sports/Work");
             Console.ReadLine();
         }
+
+
 
         static TokenResponse RequestToken()
         {
@@ -34,20 +73,41 @@ namespace ConsoleClientCredentialsFlow
 
             return client.RequestClientCredentialsAsync("api1").Result;
         }
-        static void CallService(string token, string path)
+        static async void CallService(string token, string path)
         {
-            var baseAddress = Constants.AspNetWebApiSampleApi;
-
-            var client = new HttpClient
+            try
             {
-                BaseAddress = new Uri(baseAddress)
-            };
+                var baseAddress = Constants.AspNetWebApiSampleApi;
+                using (var client = new HttpClient
+                {
+                    BaseAddress = new Uri(baseAddress)
+                })
+                {
+                    client.SetBearerToken(token);
+                    HttpResponseMessage response = await client.GetAsync(path);
+                    Console.WriteLine("StatusCode:{0}", response.StatusCode);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var result = await response.Content.ReadAsStringAsync();
+                        "\n\nService claims:".ConsoleGreen();
+                        Console.WriteLine(JArray.Parse(result));
+                    }
+                }
 
-            client.SetBearerToken(token);
-            var response = client.GetStringAsync(path).Result;
+            }
+            catch (HttpRequestException he)
+            {
+                
+            }
+            catch (Exception e)
+            {
+                if (e.InnerException != null && e.InnerException.GetType() == typeof (HttpRequestException))
+                {
+                    HttpRequestException he = (HttpRequestException) e;
+                    
+                }
+            }
 
-            "\n\nService claims:".ConsoleGreen();
-            Console.WriteLine(JArray.Parse(response));
         }
         private static void ShowResponse(TokenResponse response)
         {

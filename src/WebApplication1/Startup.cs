@@ -263,7 +263,8 @@ namespace WebApplication1
 
             app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
 
-            app.UseIdentityServer();
+            // due to an JWT defect we cannot be an IdentityServer4 and provide APIs 
+            //app.UseIdentityServer();
 
             app.UseCors(policy =>
             {

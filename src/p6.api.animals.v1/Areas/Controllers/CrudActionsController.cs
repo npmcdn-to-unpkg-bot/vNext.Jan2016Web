@@ -5,7 +5,7 @@ using Microsoft.AspNet.Mvc;
 namespace Basic.Controllers
 {
     [Area("api")]
-    [Route("/products")]
+    [Route("[area]/products")]
     [Produces("application/json")]
     public class CrudActionsController:Controller
     {
