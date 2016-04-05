@@ -28,6 +28,3 @@ This is a IdentityServer4 console client that test that the client credentials a
 
 
 So, you need to run both the WebApplications, and then run the client to test the apis.
-
-
-
