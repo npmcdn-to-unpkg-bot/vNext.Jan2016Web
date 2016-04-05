@@ -1,18 +1,20 @@
 using System.Linq;
-using System.Security.Claims;
+using System.Reflection;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
-using Microsoft.AspNet.Routing;
 using Microsoft.Extensions.Configuration;
+using Pingo.Filters.Attributes;
 
 namespace Pingo.Filters
 {
+
     public class AuthApiActionFilter : ActionFilterAttribute
     {
         public static string Area { get; set; }
         public static string Controller { get; set; }
         public static string Action { get; set; }
         private static IConfigurationRoot _configurationRoot;
+
         public AuthApiActionFilter(IConfigurationRoot configurationRoot)
         {
             _configurationRoot = configurationRoot;
@@ -29,10 +31,18 @@ namespace Pingo.Filters
             }
             else
             {
+                var scopeAttribute = (ScopeAttribute)context.Controller.GetType().GetTypeInfo().GetCustomAttribute(typeof(ScopeAttribute));
+
                 var result = from claim in context.HttpContext.User.Claims
-                    where claim.Type == ClaimTypes.NameIdentifier
+                    where claim.Type == "scope"
                     select claim;
                 if (!result.Any())
+                {
+                    context.Result = new HttpStatusCodeResult((int) System.Net.HttpStatusCode.Forbidden);
+                    return;
+                }
+                var scopeClaim = result.First();
+                if (!scopeAttribute.Values.Contains(scopeClaim.Value))
                 {
                     context.Result = new HttpStatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
                     return;

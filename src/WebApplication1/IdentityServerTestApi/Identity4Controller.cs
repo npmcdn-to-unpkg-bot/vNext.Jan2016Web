@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
+using Pingo.Filters.Attributes;
 
 namespace WebApplication1.IdentityServerTestApi
 {
@@ -30,6 +28,7 @@ namespace WebApplication1.IdentityServerTestApi
         }
     }
 
+    [Scope(new []{"api1"})]
     [Area("apiv1")]
     [Route("[area]/[controller]")]
     public class Identity4AuthController : Controller
