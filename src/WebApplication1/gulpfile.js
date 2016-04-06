@@ -68,6 +68,16 @@ gulp.task('copy:Hello.Polymer:assets', function () {
         .pipe(gulp.dest(paths.webroot+'assets/'));
 });
 
+gulp.task('copy:Hello.ReactJS:areas', function () {
+    return gulp.src(['../Hello.ReactJS/Areas/**', '!../Hello.ReactJS/Areas/*/{Controllers,Controllers/**}'])
+        .pipe(gulp.dest('Areas/'));
+});
+
+gulp.task('copy:Hello.ReactJS:assets', function () {
+    return gulp.src(['../Hello.ReactJS/assets/**'])
+        .pipe(gulp.dest(paths.webroot + 'assets/'));
+});
+
 gulp.task('copy:p6.PartnerManagement:assets', function () {
     return gulp.src(['../p6.PartnerManagement/assets/**'])
         .pipe(gulp.dest(paths.webroot + 'assets/'));
@@ -112,6 +122,8 @@ gulp.task('watch', [
         'copy:p6.main:areas',
         'copy:Hello.Polymer:areas',
         'copy:Hello.Polymer:assets',
+        'copy:Hello.ReactJS:areas',
+        'copy:Hello.ReactJS:assets',
         'copy:p6.PartnerManagement:assets',
         'copy:p6.PartnerManagement:areas',
         'copy:p6.sports:areas',
@@ -124,6 +136,8 @@ gulp.task('watch', [
         gulp.watch(['../p6.main/Areas/**'], ['copy:p6.main:areas']);
         gulp.watch(['../Hello.Polymer/Areas/**'], ['copy:Hello.Polymer:areas']);
         gulp.watch(['../Hello.Polymer/assets/**'], ['copy:Hello.Polymer:assets']);
+        gulp.watch(['../Hello.ReactJS/Areas/**'], ['copy:Hello.ReactJS:areas']);
+        gulp.watch(['../Hello.ReactJS/assets/**'], ['copy:Hello.ReactJS:assets']);
         gulp.watch(['../p6.PartnerManagement/assets/**'], ['copy:p6.PartnerManagement:assets']);
         gulp.watch(['../p6.PartnerManagement/Areas/**'], ['copy:p6.PartnerManagement:areas']);
         gulp.watch(['../DeveloperAuth/Areas/**'], ['copy:DeveloperAuth']);

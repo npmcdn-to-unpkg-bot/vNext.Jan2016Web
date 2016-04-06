@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0-*",
+  "description": "Hello.ReactJS Class Library",
+  "authors": [ "Herb" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "Biggy.Data.Json": "0.1.0.1"
+      }
+    }
+  },
+  "dependencies": {
+    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+    "Pingo.Filters": "1.0.0-*"
+  }
+}

@@ -11,6 +11,7 @@
     "EntityFramework.Commands": "7.0.0-rc1-final",
     "EntityFramework.MicrosoftSqlServer": "7.0.0-rc1-final",
     "Hello.Polymer": "1.0.0-*",
+    "Hello.ReactJS": "1.0.0-*",
     "IdentityServer4": "1.0.0-beta1-update1",
     "IdentityServer4.AccessTokenValidation": "1.0.0-beta3",
     "Microsoft.AspNet.Antiforgery": "1.0.0-rc1-final",

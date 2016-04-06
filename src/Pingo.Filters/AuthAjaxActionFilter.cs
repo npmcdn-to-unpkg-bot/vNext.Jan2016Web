@@ -8,14 +8,14 @@ using Pingo.Filters.Attributes;
 namespace Pingo.Filters
 {
 
-    public class AuthApiActionFilter : ActionFilterAttribute
+    public class AuthAjaxActionFilter : ActionFilterAttribute
     {
         public static string Area { get; set; }
         public static string Controller { get; set; }
         public static string Action { get; set; }
         private static IConfigurationRoot _configurationRoot;
 
-        public AuthApiActionFilter(IConfigurationRoot configurationRoot)
+        public AuthAjaxActionFilter(IConfigurationRoot configurationRoot)
         {
             _configurationRoot = configurationRoot;
             Area = _configurationRoot["Filters:Configuration:AuthActionFilter:Area"];
@@ -28,27 +28,8 @@ namespace Pingo.Filters
             if (!context.HttpContext.User.Identity.IsAuthenticated)
             {
                 context.Result = new HttpStatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
+                return;
             }
-            else
-            {
-                var scopeAttribute = (ScopeAttribute)context.Controller.GetType().GetTypeInfo().GetCustomAttribute(typeof(ScopeAttribute));
-
-                var result = from claim in context.HttpContext.User.Claims
-                    where claim.Type == "scope"
-                    select claim;
-                if (!result.Any())
-                {
-                    context.Result = new HttpStatusCodeResult((int) System.Net.HttpStatusCode.Forbidden);
-                    return;
-                }
-                var scopeClaim = result.First();
-                if (!scopeAttribute.Values.Contains(scopeClaim.Value))
-                {
-                    context.Result = new HttpStatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
-                    return;
-                }
-            }
-
             base.OnActionExecuting(context);
         }
     }
