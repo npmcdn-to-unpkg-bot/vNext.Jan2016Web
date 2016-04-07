@@ -22,6 +22,16 @@ textarea {
     z-index: 10 !important;
 }
 
+.carousel .item {
+  height: 360px;
+  background-color: #FF7905;
+}
+
+.carousel-inner img {
+  margin: auto;
+  max-height: 180px;
+   
+}
     .carousel-caption p {
         font-size: 20px;
         line-height: 1.4;

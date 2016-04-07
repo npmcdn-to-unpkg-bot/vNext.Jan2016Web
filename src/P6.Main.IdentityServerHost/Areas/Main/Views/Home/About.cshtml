@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "About";
+}
+@using System.Threading.Tasks
+@using P6.Main.IdentityServerHost.Models
+@model IEnumerable<P6.Main.IdentityServerHost.Models.ClaimType>
+<h2>@ViewData["Title"].</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>Use this area to provide additional information.</p>
+@foreach (var claimType in Model)
+{
+    <div>
+        @claimType.Type
+        @claimType.Value
+    </div>
+}

@@ -48,13 +48,13 @@ gulp.task("clean:areas", function (cb) {
     rimraf(paths.areas, cb);
 });
 
-gulp.task('copy:p6.main', function () {
-    return gulp.src(['../p6.main/Views/**'])
+gulp.task('copy:P6.Main.IdentityServerHost', function () {
+    return gulp.src(['../P6.Main.IdentityServerHost/Views/**'])
         .pipe(gulp.dest('Views/'));
 });
 
-gulp.task('copy:p6.main:areas', function () {
-    return gulp.src(['../p6.main/Areas/**', '!../p6.main/Areas/*/{Controllers,Controllers/**}'])
+gulp.task('copy:P6.Main.IdentityServerHost:areas', function () {
+    return gulp.src(['../P6.Main.IdentityServerHost/Areas/**', '!../P6.Main.IdentityServerHost/Areas/*/{Controllers,Controllers/**}'])
         .pipe(gulp.dest('Areas/'));
 });
 
@@ -82,16 +82,16 @@ gulp.task('copy:Pingo.Authorization:areas', function () {
 
 
 gulp.task('watch', [
-        'copy:p6.main',
-        'copy:p6.main:areas',
+        'copy:P6.Main.IdentityServerHost',
+        'copy:P6.Main.IdentityServerHost:areas',
         'copy:p6.PartnerManagement:assets',
         'copy:p6.PartnerManagement:areas',
         'copy:Pingo.Authorization:areas',
         'copy:DeveloperAuth'
 ],
     function () {
-        gulp.watch(['../p6.main/Views/**'], ['copy:p6.main']);
-        gulp.watch(['../p6.main/Areas/**'], ['copy:p6.main:areas']);
+        gulp.watch(['../P6.Main.IdentityServerHost/Views/**'], ['copy:P6.Main.IdentityServerHost']);
+        gulp.watch(['../P6.Main.IdentityServerHost/Areas/**'], ['copy:P6.Main.IdentityServerHost:areas']);
         gulp.watch(['../p6.PartnerManagement/assets/**'], ['copy:p6.PartnerManagement:assets']);
         gulp.watch(['../p6.PartnerManagement/Areas/**'], ['copy:p6.PartnerManagement:areas']);
         gulp.watch(['../DeveloperAuth/Areas/**'], ['copy:DeveloperAuth']);
