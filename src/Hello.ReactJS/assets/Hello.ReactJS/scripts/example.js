@@ -9,6 +9,19 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+const Form = JSONSchemaForm.default;
+const schema = {
+    title: "Comment",
+    type: "object",
+    required: ["author","text"],
+    properties: {
+        author: {type: "string", title: "Author", default: "Your Name"},
+        text: {type: "string", title: "Comment", default: "Hi"},
+        done: {type: "boolean", title: "Done?", default: false}
+    }
+};
+
+const log = (type) => console.log.bind(console, type);
 
 var Comment = React.createClass({
   rawMarkup: function() {
@@ -100,17 +113,17 @@ var CommentList = React.createClass({
 });
 
 var CommentForm = React.createClass({
+
   getInitialState: function() {
-    return {author: '', text: ''};
+      return {author: '', text: ''};
   },
-  handleAuthorChange: function(e) {
-    this.setState({author: e.target.value});
-  },
-  handleTextChange: function(e) {
-    this.setState({text: e.target.value});
+  handleChange: function(e) {
+      this.setState({
+          author: e.formData.author,
+          text: e.formData.text
+      });
   },
   handleSubmit: function(e) {
-    e.preventDefault();
     var author = this.state.author.trim();
     var text = this.state.text.trim();
     if (!text || !author) {
@@ -121,21 +134,19 @@ var CommentForm = React.createClass({
   },
   render: function() {
     return (
-      <form className="commentForm" onSubmit={this.handleSubmit}>
-        <input
-          type="text"
-          placeholder="Your name"
-          value={this.state.author}
-          onChange={this.handleAuthorChange}
-        />
-        <input
-          type="text"
-          placeholder="Say something..."
-          value={this.state.text}
-          onChange={this.handleTextChange}
-        />
-        <input type="submit" value="Post" />
-      </form>
+       <Form 
+            schema={schema}
+            formData={this.state}
+           onChange={this.handleChange
+            }
+            onSubmit={this.handleSubmit}
+            onError={log("errors")} 
+        >
+        <div>
+            <button type="submit">Submit</button>
+            <button>Cancel</button>
+        </div>
+        </Form>
     );
   }
 });

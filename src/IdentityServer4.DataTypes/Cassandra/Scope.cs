@@ -39,7 +39,7 @@ namespace IdentityServer4.DataTypes.Cassandra
 
         //
         // Summary:
-        //     scopt secrets - only relevant for flows that require a secret
+        //     scope secrets - only relevant for flows that require a secret
         public IEnumerable<Secret> ScopeSecrets { get; set; }
 
         public IEnumerable<ScopeClaim> ScopeClaims { get; set; }
