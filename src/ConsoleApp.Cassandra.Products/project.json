@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0-*",
+  "description": "ConsoleApp.Cassandra.Products Console Application",
+  "authors": [ "Dev" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Newtonsoft.Json": "8.0.3",
+    "Newtonsoft.Json.Schema": "2.0.2",
+    "p6.CassandraStore": "1.0.0-*"
+  },
+
+  "commands": {
+    "ConsoleApp.Cassandra.Products": "ConsoleApp.Cassandra.Products"
+  },
+
+  "frameworks": {
+    "dnx451": {
+      "dependencies": {
+        "CassandraCSharpDriver": "3.0.4"
+      }
+    }
+  }
+}
