@@ -9,23 +9,44 @@ CREATE TABLE IF NOT EXISTS Bubbles (
 	Name text,
 	DeviceId uuid,
 	DeviceIdText text,
-   PRIMARY KEY (Id, DeviceId)
+   PRIMARY KEY (Id)
 );
 
 
 CREATE TABLE IF NOT EXISTS ProductTemplates (
 	Id uuid,
-  	Type text,
-  	version text,
-	document text,
+  	DocumentType text,
+  	DocumentVersion text,
+	Document text,
    PRIMARY KEY (Id)
+);
+
+CREATE TABLE IF NOT EXISTS ProductTemplates_by_type (
+	Id uuid,
+  	DocumentType text,
+  	DocumentVersion text,
+	Document text,
+   PRIMARY KEY (DocumentType,DocumentVersion)
 );
 
 CREATE TABLE IF NOT EXISTS ProductInstances (
 	Id uuid,
-  	Type text,
-  	version text,
-	document text,
+	label text,
 	bubbleId uuid,
+	ProductTemplateId uuid,
+  	DocumentType text,
+  	DocumentVersion text,
+	Document text,
    PRIMARY KEY (Id)
+);
+
+CREATE TABLE IF NOT EXISTS ProductInstances_by_label (
+	label text,
+	Id uuid,
+	bubbleId uuid,
+	ProductTemplateId uuid,
+  	DocumentType text,
+  	DocumentVersion text,
+	Document text,
+   PRIMARY KEY (label,Id)
 );

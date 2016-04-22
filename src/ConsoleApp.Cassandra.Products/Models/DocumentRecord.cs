@@ -8,7 +8,7 @@ namespace ConsoleApp.Cassandra.Products.Models
         IDocumentMetaData MetaData { get; }
         object Document { get; }
         string DocumentJson { get; }
-       
+
         string MetaDataJson { get; }
     }
 
@@ -20,6 +20,12 @@ namespace ConsoleApp.Cassandra.Products.Models
         {
             _document = document;
         }
+        public DocumentRecord(T document, DocumentMetaData metaData)
+        {
+            _document = document;
+            DocumentMetaData = metaData;
+        }
+
 
         public DocumentMetaData DocumentMetaData { get; set; }
 

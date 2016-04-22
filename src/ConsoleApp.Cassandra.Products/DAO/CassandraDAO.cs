@@ -16,10 +16,29 @@ namespace ConsoleApp.Cassandra.Products.DAO
     {
         private static ISession _cassandraSession = null;
 
-        private static AsyncLazy<PreparedStatement> _CreateProductTemplate { get; set; }
+        //-----------------------------------------------
+        // PREPARED STATEMENTS for ProductTemplates
+        //-----------------------------------------------
+        private static AsyncLazy<PreparedStatement> _CreateProductTemplateById { get; set; }
+        private static AsyncLazy<PreparedStatement> _CreateProductTemplateByType { get; set; }
+        private static AsyncLazy<PreparedStatement[]> _CreateProductTemplate { get; set; }
+
         private static AsyncLazy<PreparedStatement> _FindProductTemplateById { get; set; }
-        private static AsyncLazy<PreparedStatement> _CreateProductInstance { get; set; }
+        private static AsyncLazy<PreparedStatement> _FindProductTemplateByType { get; set; }
+        private static AsyncLazy<PreparedStatement> _FindProductTemplateByTypeAndVersion { get; set; }
+
+        //-----------------------------------------------
+        // PREPARED STATEMENTS for ProductInstances
+        //-----------------------------------------------
+        private static AsyncLazy<PreparedStatement> _CreateProductInstanceById { get; set; }
+        private static AsyncLazy<PreparedStatement> _CreateProductInstanceByLabel { get; set; }
+        private static AsyncLazy<PreparedStatement[]> _CreateProductInstance { get; set; }
         public static AsyncLazy<PreparedStatement> _FindProductInstanceById { get; set; }
+        public static AsyncLazy<PreparedStatement> _FindProductInstanceByLabel { get; set; }
+
+        //-----------------------------------------------
+        // PREPARED STATEMENTS for Bubbles
+        //-----------------------------------------------
         private static AsyncLazy<PreparedStatement> _CreateBubbleRecord { get; set; }
         public static AsyncLazy<PreparedStatement> _FindBubbleRecordById { get; set; }
 
@@ -42,43 +61,91 @@ namespace ConsoleApp.Cassandra.Products.DAO
                         _cassandraSession = dao.GetSession();
 
                         //-----------------------------------------------
-                        // PREPARED STATEMENT
+                        // PREPARED STATEMENTS for ProductTemplates
                         //-----------------------------------------------
-                        _CreateProductTemplate =
+                        _CreateProductTemplateById =
                             new AsyncLazy<PreparedStatement>(
                                 () =>
                                 {
                                     var result = _cassandraSession.PrepareAsync(
                                         @"INSERT INTO " +
-                                        @"producttemplates(id,type,version,document) " +
+                                        @"producttemplates(id,documenttype,documentversion,document) " +
                                         @"VALUES(?,?,?,?)");
                                     return result;
                                 });
-                        //-----------------------------------------------
-                        // PREPARED STATEMENT
-                        //-----------------------------------------------
-                        _FindProductTemplateById =
-                            new AsyncLazy<PreparedStatement>(
-                                () => _cassandraSession.PrepareAsync("SELECT * FROM producttemplates WHERE id = ?"));
-                        //-----------------------------------------------
-                        // PREPARED STATEMENT
-                        //-----------------------------------------------
-                        _CreateProductInstance =
+                        _CreateProductTemplateByType =
                             new AsyncLazy<PreparedStatement>(
                                 () =>
                                 {
                                     var result = _cassandraSession.PrepareAsync(
                                         @"INSERT INTO " +
-                                        @"productinstances(id,type,version,document,bubbleid) " +
-                                        @"VALUES(?,?,?,?,?)");
+                                        @"producttemplates_by_type(documenttype,documentversion,id,document) " +
+                                        @"VALUES(?,?,?,?)");
                                     return result;
                                 });
+                        // All the statements needed by the CreateAsync method
+                        _CreateProductTemplate = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
+                        {
+                            _CreateProductTemplateById.Value,
+                            _CreateProductTemplateByType.Value,
+                        }));
+                        _FindProductTemplateById =
+                            new AsyncLazy<PreparedStatement>(
+                                () => _cassandraSession.PrepareAsync("SELECT * "+
+                                                                        "FROM producttemplates "+
+                                                                        "WHERE id = ?"));
+                        _FindProductTemplateByType =
+                            new AsyncLazy<PreparedStatement>(
+                                () => _cassandraSession.PrepareAsync("SELECT * "+
+                                                                        "FROM producttemplates_by_type "+
+                                                                        "WHERE documenttype = ?"));
+                        _FindProductTemplateByTypeAndVersion =
+                            new AsyncLazy<PreparedStatement>(
+                                () => _cassandraSession.PrepareAsync("SELECT * "+
+                                                                        "FROM producttemplates_by_type "+
+                                                                        "WHERE documenttype = ? " +
+                                                                        "AND documentversion = ?"));
+
                         //-----------------------------------------------
-                        // PREPARED STATEMENT
+                        // PREPARED STATEMENTS for ProductInstances
                         //-----------------------------------------------
+
+
+                        _CreateProductInstanceById =
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"INSERT INTO " +
+                                        @"productinstances(id,label,producttemplateid,documenttype,documentversion,document,bubbleid) " +
+                                        @"VALUES(?,?,?,?,?,?,?)");
+                                    return result;
+                                });
+                        _CreateProductInstanceByLabel =
+                            new AsyncLazy<PreparedStatement>(
+                                () =>
+                                {
+                                    var result = _cassandraSession.PrepareAsync(
+                                        @"INSERT INTO " +
+                                        @"productinstances_by_label(label,id,producttemplateid,documenttype,documentversion,document,bubbleid) " +
+                                        @"VALUES(?,?,?,?,?,?,?)");
+                                    return result;
+                                });
+                        // All the statements needed by the CreateAsync method
+                        _CreateProductInstance = new AsyncLazy<PreparedStatement[]>(() => Task.WhenAll(new[]
+                        {
+                            _CreateProductInstanceById.Value,
+                            _CreateProductInstanceByLabel.Value,
+                        }));
+
                         _FindProductInstanceById =
                             new AsyncLazy<PreparedStatement>(
                                 () => _cassandraSession.PrepareAsync("SELECT * FROM productinstances WHERE id = ?"));
+
+                        _FindProductInstanceByLabel =
+                            new AsyncLazy<PreparedStatement>(
+                                () => _cassandraSession.PrepareAsync("SELECT * FROM productinstances_by_label WHERE label = ?"));
+
                         //-----------------------------------------------
                         // PREPARED STATEMENT
                         //-----------------------------------------------
@@ -121,13 +188,29 @@ namespace ConsoleApp.Cassandra.Products.DAO
             if (documentRecord.Document == null)
                 throw new ArgumentNullException(nameof(documentRecord.Document));
 
-            PreparedStatement prepared = await _CreateProductTemplate;
-            BoundStatement bound = prepared.Bind(documentRecord.MetaData.TypeId
+            PreparedStatement[] prepared = await _CreateProductTemplate;
+
+            var preparedById = prepared[0];
+            var preparedByType = prepared[1];
+
+            BoundStatement boundById = preparedById.Bind(
+                  documentRecord.Id
                 , documentRecord.MetaData.Type
                 , documentRecord.MetaData.Version
                 , documentRecord.DocumentJson);
 
-            await session.ExecuteAsync(bound).ConfigureAwait(false);
+            //@"producttemplates_by_type(documenttype,documentversion,id,document) " +
+            BoundStatement boundByType = preparedByType.Bind(
+                  documentRecord.MetaData.Type
+                , documentRecord.MetaData.Version
+                , documentRecord.Id
+                , documentRecord.DocumentJson);
+
+            var batch = new BatchStatement();
+            batch.Add(boundById);
+            batch.Add(boundByType);
+
+            await session.ExecuteAsync(batch).ConfigureAwait(false);
             return true;
         }
         public static async Task<IProductTemplate> FindProductTemplateByIdAsync(Guid id,
@@ -152,6 +235,57 @@ namespace ConsoleApp.Cassandra.Products.DAO
                 return null;
             }
         }
+        public static async Task<List<IProductTemplate>> FindProductTemplateByTypeAsync(string type,
+          CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var session = CassandraSession;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                PreparedStatement prepared = await _FindProductTemplateByType;
+                BoundStatement bound = prepared.Bind(type);
+
+                RowSet rowSet = await session.ExecuteAsync(bound).ConfigureAwait(false);
+                var rows = rowSet.ToArray();
+                List < IProductTemplate > result = new List<IProductTemplate>();
+                foreach (var row in rows)
+                {
+                    var documentRecord = ProductTemplateFromRow(row);
+                    result.Add(documentRecord);
+                }
+                return result;
+
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        public static async Task<IProductTemplate> FindProductTemplateByTypeAndVersionAsync(
+            string type, string version,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var session = CassandraSession;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                PreparedStatement prepared = await _FindProductTemplateByTypeAndVersion;
+                BoundStatement bound = prepared.Bind(type);
+
+                RowSet rowSet = await session.ExecuteAsync(bound).ConfigureAwait(false);
+                var row = rowSet.SingleOrDefault();
+                var documentRecord = ProductTemplateFromRow(row);
+                return documentRecord;
+
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
 
         public static async Task<bool> CreateProductInstanceAsync<T>(T documentRecord,
           CancellationToken cancellationToken = default(CancellationToken))
@@ -165,14 +299,37 @@ namespace ConsoleApp.Cassandra.Products.DAO
             if (documentRecord.Document == null)
                 throw new ArgumentNullException(nameof(documentRecord.Document));
 
-            PreparedStatement prepared = await _CreateProductInstance;
-            BoundStatement bound = prepared.Bind(documentRecord.MetaData.TypeId
-                , documentRecord.MetaData.Type
-                , documentRecord.MetaData.Version
-                , documentRecord.DocumentJson
-                , documentRecord.BubbleId);
+            PreparedStatement[] prepared = await _CreateProductInstance;
 
-            await session.ExecuteAsync(bound).ConfigureAwait(false);
+            var preparedById = prepared[0];
+            var preparedByLabel = prepared[1];
+
+            //@"productinstances(id,label,producttemplateid,documenttype,documentversion,document,bubbleid) " +
+            BoundStatement boundById = preparedById.Bind(
+                 documentRecord.Id
+               , documentRecord.Label
+               , documentRecord.ProductTemplateId
+               , documentRecord.MetaData.Type
+               , documentRecord.MetaData.Version
+               , documentRecord.DocumentJson
+               , documentRecord.BubbleId);
+
+            //@"productinstances(label,id,producttemplateid,documenttype,documentversion,document,bubbleid) " +
+            BoundStatement boundByLabel = preparedByLabel.Bind(
+                 documentRecord.Label
+               , documentRecord.Id
+               , documentRecord.ProductTemplateId
+               , documentRecord.MetaData.Type
+               , documentRecord.MetaData.Version
+               , documentRecord.DocumentJson
+               , documentRecord.BubbleId);
+
+            var batch = new BatchStatement();
+            batch.Add(boundById);
+            batch.Add(boundByLabel);
+
+            await session.ExecuteAsync(batch).ConfigureAwait(false);
+
             return true;
         }
         public static async Task<IProductInstance> FindProductInstanceByIdAsync(Guid id,
@@ -197,6 +354,33 @@ namespace ConsoleApp.Cassandra.Products.DAO
                 return null;
             }
         }
+        public static async Task<List<IProductInstance>> FindProductInstanceByLabelAsync(string label,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
+            try
+            {
+                var session = CassandraSession;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                PreparedStatement prepared = await _FindProductInstanceByLabel;
+                BoundStatement bound = prepared.Bind(label);
+
+                RowSet rowSet = await session.ExecuteAsync(bound).ConfigureAwait(false);
+                var rows = rowSet.ToArray();
+                var result = new List<IProductInstance>();
+                foreach (var row in rows)
+                {
+                    var documentRecord = ProductInstanceFromRow(row);
+                    result.Add(documentRecord);
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
         public static async Task<bool> CreateBubbleRecordAsync<T>(T documentRecord,
             CancellationToken cancellationToken = default(CancellationToken))
             where T : IBubbleRecord
@@ -248,18 +432,13 @@ namespace ConsoleApp.Cassandra.Products.DAO
         {
             if (row == null)
                 return null;
-            var tt = row.GetValue<string>("type");
+            var tt = row.GetValue<string>("documenttype");
             var type = Type.GetType(tt);
             var document = row.GetValue<string>("document");
             var theObject = JsonConvert.DeserializeObject(document, type);
-            var documentRecord = new ProductTemplate<object>(theObject)
+            var documentRecord = new ProductTemplate<object>(row.GetValue<Guid>("id"),theObject)
             {
-                DocumentMetaData = new DocumentMetaData()
-                {
-                    Type = type.FullName,
-                    TypeId = row.GetValue<Guid>("id"),
-                    Version = row.GetValue<string>("version")
-                }
+                DocumentMetaData = new DocumentMetaData(type.FullName, row.GetValue<string>("documentversion"))
             };
 
             return documentRecord;
@@ -269,20 +448,16 @@ namespace ConsoleApp.Cassandra.Products.DAO
         {
             if (row == null)
                 return null;
-            var tt = row.GetValue<string>("type");
+            var tt = row.GetValue<string>("documenttype");
             var type = Type.GetType(tt);
             var document = row.GetValue<string>("document");
             var theObject = JsonConvert.DeserializeObject(document, type);
-            var documentRecord = new ProductInstance<object>(theObject)
+            var documentRecord = new ProductInstance<object>(row.GetValue<Guid>("id"),theObject)
             {
-                DocumentMetaData = new DocumentMetaData()
-                {
-                    Type = type.FullName,
-                    TypeId = row.GetValue<Guid>("id"),
-                    Version = row.GetValue<string>("version")
-                },
+                DocumentMetaData = new DocumentMetaData(type.FullName, row.GetValue<string>("documentversion")),
                 BubbleId = row.GetValue<Guid>("bubbleid"),
-
+                Label = row.GetValue<string>("label"),
+                ProductTemplateId = row.GetValue<Guid>("producttemplateid"),
             };
 
             return documentRecord;
